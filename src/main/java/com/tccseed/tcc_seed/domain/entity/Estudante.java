@@ -32,9 +32,6 @@ public class Estudante extends Usuario {
     @Column(columnDefinition = "genero")
     private Genero genero;
 
-    @Column(name = "regiao_administrativa", columnDefinition = "char(100)")
-    private String regiaoAdministrativa;
-
     @Column(name = "pais_origem", nullable = false, columnDefinition = "char(50)")
     private String paisOrigem;
 }

@@ -9,6 +9,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.ColumnTransformer;
 
+import java.util.UUID;
+
 @Entity
 @Table(name = "usuario")
 @Inheritance(strategy = InheritanceType.JOINED)
@@ -34,4 +36,7 @@ public abstract class Usuario {
     @ColumnTransformer(write = "?::tipo_usuario")
     @Column(name = "tipo", nullable = false, columnDefinition = "tipo_usuario")
     private TipoUsuario tipo;
+
+    @Column(name = "token", nullable = false, updatable = false)
+    private UUID token;
 }
