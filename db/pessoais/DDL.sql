@@ -3,7 +3,7 @@
 -- Autor(es) ..............: João Ginuino e Gabriela Lemos                             --
 -- Versão .................: 1.0                                                       --
 -- Banco de Dados .........: PostgreSQL                                                --
--- Descrição ..............: Criação das tabelas da aplicação Seed.                    --
+-- Descrição ..............: Criação das tabelas da aplicação Seed dados pessoais.     --
 -- --------------------------------------------------------------------------------------
 
 
