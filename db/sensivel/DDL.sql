@@ -17,6 +17,7 @@ BEGIN TRANSACTION;
     CREATE TABLE IES (
         id SMALLSERIAL NOT NULL,
         nome VARCHAR(200) NOT NULL,
+        regiao_administrativa CHAR(100),
         PRIMARY KEY (id)
     );
 
@@ -26,6 +27,7 @@ BEGIN TRANSACTION;
         username char(50) NOT NULL,
         senha TEXT NOT NULL,
         tipo TIPO_USUARIO NOT NULL,
+        token UUID NOT NULL DEFAULT gen_random_uuid(),
         PRIMARY KEY (id)
     );
 
@@ -35,7 +37,6 @@ BEGIN TRANSACTION;
         matricula CHAR(30) NOT NULL,
         nascimento DATE NOT NULL,
         genero GENERO,
-        regiao_administrativa CHAR(100),
         pais_origem CHAR(50) NOT NULL,
         PRIMARY KEY (id),
         FOREIGN KEY (id) REFERENCES USUARIO(id) ON DELETE CASCADE,
