@@ -10,6 +10,10 @@ import java.util.List;
 @Repository
 public interface UsuarioIesRepository extends JpaRepository<UsuarioIes, UsuarioIesId> {
 
+    boolean existsByIesIdAndUsuarioId(Long iesId, Long usuarioId);
+
+    void deleteByIesId(Long iesId);
+
     List<UsuarioIes> findByUsuarioId(Long usuarioId);
 
     List<UsuarioIes> findByIesId(Long iesId);

@@ -18,6 +18,7 @@ BEGIN TRANSACTION;
         id SMALLSERIAL NOT NULL,
         nome VARCHAR(200) NOT NULL,
         regiao_administrativa CHAR(100),
+        chave_vinculo VARCHAR(43) NOT NULL,
         PRIMARY KEY (id)
     );
 
@@ -28,7 +29,8 @@ BEGIN TRANSACTION;
         senha TEXT NOT NULL,
         tipo TIPO_USUARIO NOT NULL,
         token UUID NOT NULL DEFAULT gen_random_uuid(),
-        PRIMARY KEY (id)
+        PRIMARY KEY (id),
+        UNIQUE (email)
     );
 
     CREATE TABLE ESTUDANTE (

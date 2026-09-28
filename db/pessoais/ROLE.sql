@@ -5,10 +5,15 @@
 -- Banco de Dados .........: PostgreSQL                                                --
 -- Descrição ..............: Criação das transações da aplicação Seed dados pessoais.  --
 -- --------------------------------------------------------------------------------------
+-- Executado por ROLE.sh, que fornece a variável psql app_backend_password.
 
 BEGIN TRANSACTION;
 
-    CREATE ROLE app_backend WITH LOGIN PASSWORD 'troque_essa_senha_em_producao';
+    SELECT format('CREATE ROLE app_backend WITH LOGIN PASSWORD %L NOSUPERUSER NOCREATEDB NOCREATEROLE NOREPLICATION', :'app_backend_password')
+    WHERE NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'app_backend')
+    \gexec
+
+    ALTER ROLE app_backend WITH LOGIN PASSWORD :'app_backend_password' NOSUPERUSER NOCREATEDB NOCREATEROLE NOREPLICATION;
 
     REVOKE ALL ON ALL TABLES IN SCHEMA public FROM PUBLIC;
     REVOKE ALL ON ALL SEQUENCES IN SCHEMA public FROM PUBLIC;

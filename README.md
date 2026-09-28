@@ -58,10 +58,10 @@ Este projeto foi desenvolvido como **Trabalho de Conclusão de Curso (TCC)**.
 
 ### Configuração
 
-Copie o arquivo de exemplo de variáveis de ambiente e ajuste os valores conforme necessário (principalmente o `JWT_SECRET`):
+Copie o arquivo de exemplo de variáveis de ambiente e ajuste os valores conforme necessário. No Compose, a aplicação conecta como `app_backend`; defina `SPRING_DATASOURCE_PASSWORD` para a senha dessa role. Defina também `JWT_SECRET` com pelo menos 32 bytes aleatórios (por exemplo, usando `openssl rand -base64 32`):
 
 ```bash
-cp .env.example .env
+cp .example.env .env
 ```
 
 ### Executando com Docker Compose
@@ -77,6 +77,21 @@ Ou, sem o Makefile:
 ```bash
 docker compose up --build
 ```
+
+O PostgreSQL executa `db/pessoais/DDL.sql` e `db/pessoais/ROLE.sql` automaticamente ao inicializar um volume de dados novo. Os scripts não são reaplicados a um volume já inicializado, para preservar os dados existentes.
+
+### Inicializando um volume PostgreSQL existente
+
+Se o volume `postgres-data` já existir sem o schema pessoal (tipos, domínio e tabelas), atualize primeiro o `.env` com uma senha em `SPRING_DATASOURCE_PASSWORD`. Depois execute o DDL e a role uma única vez:
+
+```bash
+docker compose up -d postgres
+docker compose exec -T postgres sh -c 'psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -f /docker-entrypoint-initdb.d/01-DDL.sql'
+docker compose exec -T postgres /docker-entrypoint-initdb.d/02-ROLE.sh
+docker compose up -d app
+```
+
+O DDL não é idempotente; não o execute novamente se algum dos tipos, domínio ou tabelas já existir. O processo não apaga nem recria o volume.
 
 ### Outros comandos disponíveis (Makefile)
 
@@ -108,3 +123,74 @@ A cada push na branch `main`, uma pipeline do **GitHub Actions** realiza o build
 <div align="center">
 Feito com <3 na <strong>Universidade de Brasília</strong>
 </div>
+
+
+## Controle de IES
+
+Todas as rotas `/IES` exigem o cookie de autenticação `seed_cookie` obtido no login.
+Os dados institucionais são `id`, `nome` (obrigatório, até 200 caracteres) e
+`regiaoAdministrativa` (opcional, até 100 caracteres). Nome não é identificador único.
+
+| Método e rota | Permissão e resultado |
+| --- | --- |
+| `GET /IES?pagina=0&tamanho=20` | Usuário autenticado; lista paginada sem chave (máximo 100 por página) |
+| `GET /IES/{id}` | Usuário autenticado; dados institucionais sem chave |
+| `POST /IES` | Funcionário; cria e vincula o próprio solicitante; retorna 201 e Location |
+| `PUT /IES/{id}` | Funcionário vinculado; substitui nome e região; retorna 200 |
+| `DELETE /IES/{id}` | Funcionário vinculado; exclui IES e vínculos, preservando usuários; retorna 204 |
+| `GET /IES/{id}/privado` | Funcionário vinculado; dados institucionais e `chaveIes`, sem cache |
+| `POST /IES/{id}/vinculos` | Funcionário; exige `{"chaveIes":"..."}` válida para vincular o próprio solicitante; retorna 204 |
+| `POST /IES/{id}/chave/renovar` | Funcionário vinculado; troca a chave e retorna os dados privados, sem cache |
+
+Criação e atualização recebem `{"nome":"Universidade Exemplo","regiaoAdministrativa":"Brasília"}`.
+A chave tem 256 bits aleatórios e nunca aparece nas respostas públicas, nem é recebida na URL.
+A troca da chave impede novos ingressos com a chave antiga, sem remover funcionários já vinculados.
+Não há criação de dashboard nesta entrega; futuros endpoints privados devem exigir o mesmo vínculo.
+
+### Cadastro de funcionário com IES
+
+`POST /auth/cadastro/funcionario` recebe os campos anteriores e **exatamente uma** das opções:
+
+```json
+{
+  "email": "funcionario@example.com",
+  "username": "funcionario",
+  "senha": "exemplo",
+  "nome": "Funcionário Exemplo",
+  "formacao": "Psicologia",
+  "novaIes": {"nome": "Universidade Exemplo", "regiaoAdministrativa": "Brasília"}
+}
+```
+
+Para uma instituição existente, substitua `novaIes` por `"iesId": 1, "chaveIes": "chave-compartilhada"`.
+A resposta mantém o contrato anterior de usuário criado. Após o login, consulte a listagem de IES
+e os dados privados da instituição criada para obter sua chave.
+Funcionário, nova IES e vínculo são persistidos juntos; falha no vínculo desfaz o cadastro.
+Funcionários já cadastrados podem manter vínculos com várias instituições.
+Não há endpoint para desvincular o último funcionário ou deixar uma IES sem funcionário.
+
+Erros: 400 para dados inválidos ou opções de cadastro incompatíveis; 401 sem autenticação;
+403 para chave incorreta ou usuário sem permissão; 404 para IES inexistente;
+409 quando dados dependentes impedem a exclusão. Estudantes, mesmo vinculados,
+não podem acessar a chave ou alterar a IES.
+
+### Atualização de um banco existente
+
+Antes de iniciar esta versão, execute como proprietário do schema o script
+`db/pessoais/migrations/0001-chave-ies.sql`. O bootstrap atualizado já atende volumes novos.
+O script preserva os dados, gera chaves para instituições existentes e interrompe a atualização
+se encontrar IES sem funcionário. Identifique esses casos com:
+
+```sql
+SELECT i.id, i.nome FROM ies i
+WHERE NOT EXISTS (
+  SELECT 1 FROM usuario_ies v
+  JOIN funcionario f ON f.id = v.usuario
+  JOIN usuario u ON u.id = f.id AND u.tipo = 'funcionario'
+  WHERE v.ies = i.id
+);
+```
+
+Regularize os vínculos com os funcionários responsáveis antes de repetir o script.
+Não confie no `ddl-auto=update` para gerar as chaves ou corrigir vínculos legados.
+A criação livre de IES não verifica se o criador representa oficialmente a instituição.

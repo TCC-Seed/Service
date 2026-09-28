@@ -13,3 +13,5 @@ restart: down up
 
 clean:
 	docker compose down -v
+
+# npx skills add mattpocock/skills --skill grilling --skill domain-modeling --skill grill-with-docs --agent codex

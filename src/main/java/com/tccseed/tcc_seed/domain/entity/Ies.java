@@ -21,6 +21,9 @@ public class Ies {
     @Column(nullable = false, length = 200)
     private String nome;
 
+    @Column(name = "chave_vinculo", nullable = false, length = 43)
+    private String chaveVinculo;
+
     @Column(name = "regiao_administrativa", columnDefinition = "char(100)")
     private String regiaoAdministrativa;
 }
