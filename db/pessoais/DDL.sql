@@ -1,12 +1,3 @@
--- --------------------------------------------------------------------------------------
--- Data de Criação ........: 14/09/2026                                                --
--- Autor(es) ..............: João Ginuino e Gabriela Lemos                             --
--- Versão .................: 1.0                                                       --
--- Banco de Dados .........: PostgreSQL                                                --
--- Descrição ..............: Criação das tabelas da aplicação Seed dados pessoais.     --
--- --------------------------------------------------------------------------------------
-
-
 BEGIN TRANSACTION;
 
     CREATE TYPE TIPO_USUARIO AS ENUM('estudante', 'funcionario');
@@ -17,7 +8,7 @@ BEGIN TRANSACTION;
     CREATE TABLE IES (
         id SMALLSERIAL NOT NULL,
         nome VARCHAR(200) NOT NULL,
-        regiao_administrativa CHAR(100),
+        regiao_administrativa VARCHAR(100),
         chave_vinculo VARCHAR(43) NOT NULL,
         PRIMARY KEY (id)
     );
@@ -25,40 +16,42 @@ BEGIN TRANSACTION;
     CREATE TABLE USUARIO(
         id SERIAL NOT NULL,
         email EMAIL NOT NULL,
-        username char(50) NOT NULL,
+        username VARCHAR(50) NOT NULL,
         senha TEXT NOT NULL,
         tipo TIPO_USUARIO NOT NULL,
         token UUID NOT NULL DEFAULT gen_random_uuid(),
         PRIMARY KEY (id),
-        UNIQUE (email)
+        UNIQUE (email),
+        CONSTRAINT uk_usuario_username UNIQUE (username)
     );
 
     CREATE TABLE ESTUDANTE (
         id INTEGER NOT NULL,
         nome VARCHAR(200) NOT NULL,
-        matricula CHAR(30) NOT NULL,
+        matricula VARCHAR(30) NOT NULL,
         nascimento DATE NOT NULL,
         genero GENERO,
-        pais_origem CHAR(50) NOT NULL,
+        pais_origem VARCHAR(50) NOT NULL,
+        ies_id BIGINT NOT NULL,
         PRIMARY KEY (id),
         FOREIGN KEY (id) REFERENCES USUARIO(id) ON DELETE CASCADE,
+        CONSTRAINT fk_estudante_ies FOREIGN KEY (ies_id) REFERENCES IES(id),
         UNIQUE (matricula)
     );
+
+    CREATE INDEX idx_estudante_ies ON ESTUDANTE(ies_id);
 
     CREATE TABLE FUNCIONARIO(
         id INTEGER NOT NULL,
         nome VARCHAR(200) NOT NULL,
         formacao VARCHAR(200) NOT NULL,
+        ies_id BIGINT NOT NULL,
         PRIMARY KEY (id),
-        FOREIGN KEY (id) REFERENCES USUARIO(id) ON DELETE CASCADE
+        FOREIGN KEY (id) REFERENCES USUARIO(id) ON DELETE CASCADE,
+        CONSTRAINT fk_funcionario_ies FOREIGN KEY (ies_id) REFERENCES IES(id)
     );
 
-    CREATE TABLE USUARIO_IES(
-        ies INTEGER NOT NULL,
-        usuario INTEGER NOT NULL,
-        PRIMARY KEY (ies, usuario),
-        FOREIGN KEY (ies) REFERENCES IES(id),
-        FOREIGN KEY (usuario) REFERENCES USUARIO(id)
-    );
+    CREATE INDEX idx_funcionario_ies ON FUNCIONARIO(ies_id);
+
 
 COMMIT;

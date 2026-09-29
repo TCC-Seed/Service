@@ -1,4 +1,3 @@
-// converter/GeneroConverter.java
 package com.tccseed.tcc_seed.domain.converter;
 
 import com.tccseed.tcc_seed.domain.enums.Genero;
