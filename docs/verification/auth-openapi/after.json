@@ -1,0 +1,363 @@
+{
+  "openapi": "3.1.0",
+  "paths": {
+    "/auth/login": {
+      "post": {
+        "tags": [
+          "auth-controller"
+        ],
+        "operationId": "login",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/UsuarioResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/cadastro/funcionario": {
+      "post": {
+        "tags": [
+          "auth-controller"
+        ],
+        "summary": "Cadastrar funcionário",
+        "description": "Cadastro público: qualquer pessoa pode chamar, sem autenticação ou role. Informe novaIes para criar uma instituição, ou iesId e chaveIes para entrar em uma existente. As opções são mutuamente exclusivas. A chave deve ser fornecida por um funcionário vinculado à IES.",
+        "operationId": "cadastrarFuncionario",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FuncionarioCadastroRequest"
+              },
+              "examples": {
+                "Criar nova IES": {
+                  "description": "Criar nova IES",
+                  "value": {
+                    "email": "ana.silva@example.com",
+                    "username": "ana.silva",
+                    "senha": "Exemplo@2026",
+                    "nome": "Ana Silva",
+                    "formacao": "Psicologia",
+                    "novaIes": {
+                      "nome": "Universidade Exemplo",
+                      "regiaoAdministrativa": "Brasília"
+                    }
+                  }
+                },
+                "Entrar em IES existente": {
+                  "description": "Entrar em IES existente",
+                  "value": {
+                    "email": "ana.silva@example.com",
+                    "username": "ana.silva",
+                    "senha": "Exemplo@2026",
+                    "nome": "Ana Silva",
+                    "formacao": "Psicologia",
+                    "iesId": 1,
+                    "chaveIes": "exemplo_de_chave_privada_compartilhada_da_ies"
+                  }
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Funcionário cadastrado e vinculado à IES.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UsuarioResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Corpo inválido, campos ausentes ou opções de vínculo incompatíveis."
+          },
+          "403": {
+            "description": "Chave da IES inválida."
+          },
+          "404": {
+            "description": "IES informada não encontrada."
+          },
+          "409": {
+            "description": "E-mail ou username já cadastrados."
+          }
+        }
+      }
+    },
+    "/auth/cadastro/estudante": {
+      "post": {
+        "tags": [
+          "auth-controller"
+        ],
+        "summary": "Cadastrar estudante",
+        "description": "Cadastro público: qualquer pessoa pode chamar, sem autenticação ou role. Cria um estudante com os dados pessoais e acadêmicos informados.",
+        "operationId": "cadastrarEstudante",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EstudanteCadastroRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Estudante cadastrado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UsuarioResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Corpo inválido ou campos obrigatórios ausentes."
+          },
+          "409": {
+            "description": "E-mail, username ou matrícula já cadastrados."
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "EstudanteCadastroRequest": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "Obrigatório. E-mail único do cadastro, em formato válido, com até 254 caracteres. Não é usado para login.",
+            "example": "ana.silva@example.com",
+            "maxLength": 254,
+            "minLength": 0
+          },
+          "username": {
+            "type": "string",
+            "description": "Obrigatório. Nome de usuário único para login, com até 50 caracteres, sensível a maiúsculas/minúsculas. Espaços nas extremidades são removidos.",
+            "example": "ana.silva",
+            "maxLength": 50,
+            "minLength": 0
+          },
+          "senha": {
+            "type": "string",
+            "description": "Obrigatória. Senha de acesso, armazenada como hash. Não pode ser nula; a regra atual não exige tamanho mínimo.",
+            "example": "Exemplo@2026",
+            "writeOnly": true
+          },
+          "nome": {
+            "type": "string",
+            "description": "Obrigatório. Nome completo da pessoa, com até 200 caracteres.",
+            "example": "Ana Silva",
+            "maxLength": 200,
+            "minLength": 0
+          },
+          "matricula": {
+            "type": "string",
+            "description": "Obrigatória. Matrícula acadêmica única do estudante, com até 30 caracteres.",
+            "example": "2026001234",
+            "maxLength": 30,
+            "minLength": 0
+          },
+          "nascimento": {
+            "type": "string",
+            "format": "date",
+            "description": "Obrigatória. Data de nascimento do estudante no formato AAAA-MM-DD.",
+            "example": "2001-05-14"
+          },
+          "paisOrigem": {
+            "type": "string",
+            "description": "Obrigatório. País de origem do estudante, com até 50 caracteres.",
+            "example": "Brasil",
+            "maxLength": 50,
+            "minLength": 0
+          }
+        },
+        "required": [
+          "email",
+          "matricula",
+          "nascimento",
+          "nome",
+          "paisOrigem",
+          "senha",
+          "username"
+        ]
+      },
+      "FuncionarioCadastroRequest": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "Obrigatório. E-mail único do cadastro, em formato válido, com até 254 caracteres. Não é usado para login.",
+            "example": "ana.silva@example.com",
+            "maxLength": 254,
+            "minLength": 0
+          },
+          "username": {
+            "type": "string",
+            "description": "Obrigatório. Nome de usuário único para login, com até 50 caracteres, sensível a maiúsculas/minúsculas. Espaços nas extremidades são removidos.",
+            "example": "ana.silva",
+            "maxLength": 50,
+            "minLength": 0
+          },
+          "senha": {
+            "type": "string",
+            "description": "Obrigatória. Senha de acesso, armazenada como hash. Não pode ser nula; a regra atual não exige tamanho mínimo.",
+            "example": "Exemplo@2026",
+            "writeOnly": true
+          },
+          "nome": {
+            "type": "string",
+            "description": "Obrigatório. Nome completo da pessoa, com até 200 caracteres.",
+            "example": "Ana Silva",
+            "maxLength": 200,
+            "minLength": 0
+          },
+          "formacao": {
+            "type": "string",
+            "description": "Obrigatória. Formação profissional do funcionário, com até 200 caracteres.",
+            "example": "Psicologia",
+            "maxLength": 200,
+            "minLength": 0
+          },
+          "iesId": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Condicional. Identificador positivo da IES existente; obrigatório junto com chaveIes quando novaIes não for informada. Deve ser omitido ao criar uma nova IES.",
+            "example": 1,
+            "minimum": 0
+          },
+          "chaveIes": {
+            "type": "string",
+            "description": "Condicional. Chave privada compartilhada por um funcionário da IES, com até 128 caracteres. Obrigatória junto com iesId; deve ser omitida quando novaIes for informada.",
+            "example": "exemplo_de_chave_privada_compartilhada_da_ies",
+            "maxLength": 128,
+            "minLength": 0,
+            "writeOnly": true
+          },
+          "novaIes": {
+            "$ref": "#/components/schemas/IesRequest",
+            "description": "Condicional. Dados para criar uma IES e vincular o funcionário no mesmo cadastro. Obrigatórios quando iesId e chaveIes não forem informados. Informe exatamente uma das opções: novaIes ou iesId com chaveIes.",
+            "example": {
+              "nome": "Universidade Exemplo",
+              "regiaoAdministrativa": "Brasília"
+            }
+          }
+        },
+        "required": [
+          "email",
+          "formacao",
+          "nome",
+          "senha",
+          "username"
+        ]
+      },
+      "LoginRequest": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string",
+            "description": "Obrigatório. Nome de usuário usado no login, único e sensível a maiúsculas/minúsculas. Espaços nas extremidades são removidos.",
+            "example": "joao",
+            "maxLength": 50,
+            "minLength": 0
+          },
+          "senha": {
+            "type": "string",
+            "description": "Obrigatória. Senha do usuário, sem alteração de espaços ou letras. O campo não pode ser nulo; a regra atual não exige tamanho mínimo.",
+            "example": "Exemplo@2026",
+            "writeOnly": true
+          }
+        },
+        "required": [
+          "senha",
+          "username"
+        ]
+      },
+      "UsuarioResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Sempre retornado. Identificador do usuário cadastrado.",
+            "example": 42,
+            "readOnly": true
+          },
+          "email": {
+            "type": "string",
+            "description": "Sempre retornado. E-mail do cadastro; não é usado para login.",
+            "example": "ana.silva@example.com",
+            "readOnly": true
+          },
+          "username": {
+            "type": "string",
+            "description": "Sempre retornado. Nome de usuário único usado para login.",
+            "example": "ana.silva",
+            "readOnly": true
+          },
+          "tipo": {
+            "type": "string",
+            "description": "Sempre retornado. Tipo do usuário: ESTUDANTE ou FUNCIONARIO.",
+            "enum": [
+              "ESTUDANTE",
+              "FUNCIONARIO"
+            ],
+            "example": "ESTUDANTE",
+            "readOnly": true
+          }
+        },
+        "required": [
+          "email",
+          "id",
+          "tipo",
+          "username"
+        ]
+      },
+      "IesRequest": {
+        "type": "object",
+        "properties": {
+          "nome": {
+            "type": "string",
+            "description": "Obrigatório. Nome da instituição, com até 200 caracteres.",
+            "maxLength": 200,
+            "minLength": 0
+          },
+          "regiaoAdministrativa": {
+            "type": "string",
+            "description": "Opcional. Região administrativa da instituição, com até 100 caracteres.",
+            "maxLength": 100,
+            "minLength": 0
+          }
+        },
+        "required": [
+          "nome"
+        ]
+      }
+    }
+  }
+}
