@@ -78,7 +78,12 @@ Ou, sem o Makefile:
 docker compose up --build
 ```
 
-O PostgreSQL executa `db/pessoais/DDL.sql` e `db/pessoais/ROLE.sql` automaticamente ao inicializar um volume de dados novo. Os scripts não são reaplicados a um volume já inicializado, para preservar os dados existentes.
+O PostgreSQL executa `db/pessoais/DDL.sql`, `db/pessoais/ROLE.sql` e `db/pessoais/triggers.sql` automaticamente ao inicializar um volume de dados novo. Os scripts não são reaplicados a um volume já inicializado, para preservar os dados existentes.
+
+O `ROLE.sql` usa o comando `\getenv` do `psql` para ler `SPRING_DATASOURCE_PASSWORD`
+diretamente do ambiente e rejeita senha ausente ou vazia. Não é necessário um arquivo
+shell intermediário. Execute esse arquivo pelo `psql`, pois ele contém metacomandos
+do cliente, conforme a [documentação do PostgreSQL](https://www.postgresql.org/docs/17/app-psql.html).
 
 ### Inicializando um volume PostgreSQL existente
 
@@ -87,7 +92,8 @@ Se o volume `postgres-data` já existir sem o schema pessoal (tipos, domínio e 
 ```bash
 docker compose up -d postgres
 docker compose exec -T postgres sh -c 'psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -f /docker-entrypoint-initdb.d/01-DDL.sql'
-docker compose exec -T postgres /docker-entrypoint-initdb.d/02-ROLE.sh
+docker compose exec -T postgres sh -c 'psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -f /docker-entrypoint-initdb.d/02-ROLE.sql'
+docker compose exec -T postgres sh -c 'psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" --single-transaction -f /docker-entrypoint-initdb.d/03-triggers.sql'
 docker compose up -d app
 ```
 
@@ -311,3 +317,92 @@ A conversão remove os espaços de preenchimento à direita dos valores `CHAR`, 
 a [documentação do PostgreSQL](https://www.postgresql.org/docs/17/datatype-character.html).
 O script executa as alterações em uma única transação. Não dependa de `ddl-auto=update`
 para esta migração. Volumes novos já usam `VARCHAR` no DDL e não precisam executar o script.
+
+## Auditoria de alterações
+
+`auditoria.registro` registra cada `INSERT`, `UPDATE` e `DELETE` das tabelas `ies`,
+`usuario`, `estudante` e `funcionario`, incluindo operações em cascata. O histórico
+contém tabela, identificador do registro, operação, instante com fuso (`TIMESTAMPTZ`),
+identificador de transação, origem, autor e valores anteriores e novos em JSONB.
+O instante é o da execução do trigger, não o horário de commit. A exibição usa o
+fuso da sessão do DBA.
+
+A tabela e seus índices estão em `db/pessoais/DDL.sql`; a função e todos os triggers
+estão em `db/pessoais/triggers.sql`. As permissões estão em `db/pessoais/ROLE.sql`.
+Os campos são selecionados explicitamente nos triggers. Senha/hash, token do usuário
+e chave de vínculo da IES nunca entram nos snapshots. Alterações apenas nesses campos
+também geram eventos, mas não revelam seus valores. Novas tabelas precisam de triggers
+na migração correspondente; novas colunas precisam passar pela revisão da lista de
+campos permitidos antes de serem incluídas no histórico.
+
+A aplicação informa somente a autoria, na mesma conexão e transação do Hibernate,
+por `AuditoriaService`: usuário já autenticado e autorizado, ou `cadastro_publico`.
+Ela não insere logs diretamente. Gravações feitas por `app_backend` sem contexto
+válido falham. Novos fluxos de escrita devem identificar a autoria antes de persistir;
+rotinas de cadastro aninhadas aproveitam o contexto da transação externa.
+O contexto termina no commit ou rollback, sem permanecer na conexão reutilizada.
+Esse comportamento de `set_config(..., true)` é definido na
+[documentação do PostgreSQL](https://www.postgresql.org/docs/17/functions-admin.html).
+
+SQL administrativo deve usar a conta individual do DBA: o log registra a conta
+conectada ao banco como origem `banco`. A autoria da aplicação depende da autenticação
+Java; quem tiver suas credenciais de banco poderá fornecer esse contexto e não deve
+usá-las para administração. O histórico não é uma proteção contra um DBA/superusuário
+que deliberadamente altere o banco ou desative os triggers. `TRUNCATE`, consultas,
+mudanças de estrutura e tentativas revertidas não fazem parte deste histórico;
+`app_backend` não tem permissão de `TRUNCATE`.
+
+Não há endpoints de auditoria. A role da aplicação não pode consultar, inserir,
+alterar ou excluir o histórico. O trigger usa uma função `SECURITY DEFINER`, com
+`search_path` restrito e execução pública revogada, seguindo as
+[orientações do PostgreSQL](https://www.postgresql.org/docs/17/sql-createfunction.html#SQL-CREATEFUNCTION-SECURITY).
+Os objetos devem pertencer ao DBA, nunca à role da aplicação. Uma falha na auditoria
+cancela a alteração de negócio; rollback também remove o log. A exclusão da conta
+do autor não remove nem invalida sua identificação histórica.
+
+### Aplicação em banco existente
+
+Com a aplicação parada e as migrações anteriores já concluídas, execute **uma vez**
+como DBA antes de iniciar a nova versão. Atualize o container PostgreSQL para montar
+`db/pessoais` em `/opt/seed-db` (o volume de dados é preservado):
+
+```bash
+docker compose up -d postgres
+docker compose exec -T postgres sh -c 'psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -f /opt/seed-db/migrations/0006-auditoria.sql'
+```
+
+A migração cria apenas a estrutura que falta no banco legado, aplica as restrições
+de acesso e inclui `../triggers.sql` com `\ir`, tudo na mesma transação. Execute-a
+por arquivo (`-f`), mantendo a estrutura de diretórios; não a envie pela entrada padrão.
+Volumes novos executam somente `DDL.sql`, `ROLE.sql` e `triggers.sql`, nessa ordem.
+Não execute a migração 0006 nesses volumes nem em bancos onde ela já foi aplicada.
+A auditoria não cria histórico retroativo.
+Não há limpeza automática; a retenção de dados pessoais deve ser definida antes
+de produção. O `db/pessoais/DELETE.sql` remove as tabelas de negócio e também
+a tabela de auditoria com todo o histórico, sua função e seu schema, na mesma transação.
+
+Como DBA, consulte, por exemplo:
+
+```sql
+SELECT ocorrido_em, tabela, registro_id, operacao, origem, usuario_id, username,
+       conta_banco, valores_anteriores, valores_novos
+FROM auditoria.registro
+ORDER BY id DESC
+LIMIT 100;
+```
+
+### Validação da auditoria
+
+Em um PostgreSQL 17 **de testes**, com `DDL.sql`, `ROLE.sql` e `triggers.sql` aplicados
+(ou atualizado pela migração 0006),
+execute como superusuário:
+
+```bash
+psql -v ON_ERROR_STOP=1 -d seed_teste -f db/pessoais/tests/auditoria.sql
+mvn compile
+mvn -Dtest=JwtAuthenticationTest,IesServiceTest,FuncionarioCadastroTest,IesControllerTest,UsernameLoginTest,AuthControllerTest test
+```
+
+O SQL verifica cobertura das quatro tabelas, segredos omitidos, autoria, cascatas,
+rollback, falha obrigatória sem autoria ou sem auditoria e negação das permissões
+da aplicação. Os dados de teste são revertidos; as sequências podem avançar.

@@ -51,3 +51,9 @@ _Evitar_: número de usuário
 **Gênero**:
 Categoria informada para um estudante: feminino, masculino, não informar ou outro.
 _Evitar_: sexo
+
+## Histórico de alterações
+
+**Registro de auditoria do Seed**:
+Registro de uma criação, alteração ou exclusão de dados do Seed, com autoria, data e hora e valores anteriores e novos, sem credenciais de acesso.
+_Evitar_: registro de autenticação, histórico de login

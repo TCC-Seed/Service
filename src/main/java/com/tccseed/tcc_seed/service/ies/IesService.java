@@ -11,6 +11,7 @@ import com.tccseed.tcc_seed.repository.EstudanteRepository;
 import com.tccseed.tcc_seed.repository.FuncionarioRepository;
 import com.tccseed.tcc_seed.repository.IesRepository;
 import com.tccseed.tcc_seed.repository.UsuarioRepository;
+import com.tccseed.tcc_seed.service.auditoria.AuditoriaService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
@@ -36,6 +37,7 @@ public class IesService {
     private final UsuarioRepository usuarioRepository;
     private final EstudanteRepository estudanteRepository;
     private final FuncionarioRepository funcionarioRepository;
+    private final AuditoriaService auditoriaService;
     private final SecureRandom random = new SecureRandom();
 
     @Transactional(readOnly = true)
@@ -86,14 +88,14 @@ public class IesService {
 
     public IesResponse atualizar(Long id, IesRequest request, String principal) {
         Ies ies = bloquear(id);
-        exigirVinculo(ies, funcionario(principal));
+        identificarAutor(ies, principal);
         preencher(ies, request);
         return publica(ies);
     }
 
     public void excluir(Long id, String principal) {
         Ies ies = bloquear(id);
-        exigirVinculo(ies, funcionario(principal));
+        identificarAutor(ies, principal);
         try {
             estudanteRepository.deleteAll(estudanteRepository.findByIesId(id));
             estudanteRepository.flush();
@@ -109,9 +111,15 @@ public class IesService {
 
     public IesPrivadaResponse renovarChave(Long id, String principal) {
         Ies ies = bloquear(id);
-        exigirVinculo(ies, funcionario(principal));
+        identificarAutor(ies, principal);
         ies.setChaveVinculo(novaChave());
         return privada(ies);
+    }
+
+    private void identificarAutor(Ies ies, String principal) {
+        Funcionario autor = funcionario(principal);
+        exigirVinculo(ies, autor);
+        auditoriaService.identificarUsuario(autor);
     }
 
     private Funcionario funcionario(String principal) {

@@ -13,6 +13,7 @@ import com.tccseed.tcc_seed.repository.FuncionarioRepository;
 import com.tccseed.tcc_seed.repository.UsuarioRepository;
 import com.tccseed.tcc_seed.security.JwtService;
 import com.tccseed.tcc_seed.service.ies.IesService;
+import com.tccseed.tcc_seed.service.auditoria.AuditoriaService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -34,9 +35,11 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final IesService iesService;
+    private final AuditoriaService auditoriaService;
 
     @Transactional
     public UsuarioResponse cadastrarEstudante(EstudanteCadastroRequest request) {
+        auditoriaService.identificarCadastroPublico();
         validarEmailDisponivel(request.email());
         validarUsernameDisponivel(request.username());
         if (estudanteRepository.existsByMatricula(request.matricula().trim())) {
@@ -55,6 +58,7 @@ public class AuthService {
 
     @Transactional
     public UsuarioResponse cadastrarFuncionario(FuncionarioCadastroRequest request) {
+        auditoriaService.identificarCadastroPublico();
         if (!request.isVinculoValido()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Informe iesId e chaveIes, ou apenas novaIes.");
         }
