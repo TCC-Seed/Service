@@ -80,6 +80,11 @@ docker compose up --build
 
 O PostgreSQL executa `db/pessoais/DDL.sql`, `db/pessoais/ROLE.sql` e `db/pessoais/triggers.sql` automaticamente ao inicializar um volume de dados novo. Os scripts não são reaplicados a um volume já inicializado, para preservar os dados existentes.
 
+O `ROLE.sql` usa o comando `\getenv` do `psql` para ler `SPRING_DATASOURCE_PASSWORD`
+diretamente do ambiente e rejeita senha ausente ou vazia. Não é necessário um arquivo
+shell intermediário. Execute esse arquivo pelo `psql`, pois ele contém metacomandos
+do cliente, conforme a [documentação do PostgreSQL](https://www.postgresql.org/docs/17/app-psql.html).
+
 ### Inicializando um volume PostgreSQL existente
 
 Se o volume `postgres-data` já existir sem o schema pessoal (tipos, domínio e tabelas), atualize primeiro o `.env` com uma senha em `SPRING_DATASOURCE_PASSWORD`. Depois execute o DDL e a role uma única vez:
@@ -87,7 +92,7 @@ Se o volume `postgres-data` já existir sem o schema pessoal (tipos, domínio e 
 ```bash
 docker compose up -d postgres
 docker compose exec -T postgres sh -c 'psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -f /docker-entrypoint-initdb.d/01-DDL.sql'
-docker compose exec -T postgres /docker-entrypoint-initdb.d/02-ROLE.sh
+docker compose exec -T postgres sh -c 'psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -f /docker-entrypoint-initdb.d/02-ROLE.sql'
 docker compose exec -T postgres sh -c 'psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" --single-transaction -f /docker-entrypoint-initdb.d/03-triggers.sql'
 docker compose up -d app
 ```
@@ -373,8 +378,8 @@ Volumes novos executam somente `DDL.sql`, `ROLE.sql` e `triggers.sql`, nessa ord
 Não execute a migração 0006 nesses volumes nem em bancos onde ela já foi aplicada.
 A auditoria não cria histórico retroativo.
 Não há limpeza automática; a retenção de dados pessoais deve ser definida antes
-de produção. O script legado de remoção das tabelas de negócio preserva o schema
-de auditoria; não o remova durante uma limpeza de dados da aplicação.
+de produção. O `db/pessoais/DELETE.sql` remove as tabelas de negócio e também
+a tabela de auditoria com todo o histórico, sua função e seu schema, na mesma transação.
 
 Como DBA, consulte, por exemplo:
 

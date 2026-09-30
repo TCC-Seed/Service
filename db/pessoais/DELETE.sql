@@ -3,7 +3,7 @@
 -- Autor(es) ..............: João Ginuino e Gabriela Lemos                             --
 -- Versão .................: 1.0                                                       --
 -- Banco de Dados .........: PostgreSQL                                                --
--- Descrição ..............: Remoção das tabelas e tipos de dados pessoais do Seed.    --
+-- Descrição ..............: Remoção das estruturas pessoais e de auditoria do Seed.  --
 -- --------------------------------------------------------------------------------------
 
 BEGIN TRANSACTION;
@@ -12,6 +12,10 @@ BEGIN TRANSACTION;
     DROP TABLE ESTUDANTE;
     DROP TABLE USUARIO;
     DROP TABLE IES;
+
+    DROP FUNCTION auditoria.registrar();
+    DROP TABLE auditoria.registro;
+    DROP SCHEMA auditoria;
 
     DROP DOMAIN EMAIL;
 

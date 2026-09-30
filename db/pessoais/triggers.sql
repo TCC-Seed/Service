@@ -18,7 +18,6 @@ DECLARE
     novo JSONB;
     chave JSONB;
 BEGIN
-    -- session_user preserva a conta conectada mesmo sob SECURITY DEFINER.
     IF session_user = 'app_backend' THEN
         origem_ator := nullif(current_setting('seed.audit_origem', true), '');
         IF origem_ator IS NULL OR origem_ator NOT IN ('usuario', 'cadastro_publico') THEN

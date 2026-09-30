@@ -11,8 +11,7 @@ services:
     volumes:
       - postgres-data:/var/lib/postgresql/data
       - ./db/pessoais/DDL.sql:/docker-entrypoint-initdb.d/01-DDL.sql:ro
-      - ./db/pessoais/ROLE.sh:/docker-entrypoint-initdb.d/02-ROLE.sh:ro
-      - ./db/pessoais/ROLE.sql:/tmp/ROLE.sql:ro
+      - ./db/pessoais/ROLE.sql:/docker-entrypoint-initdb.d/02-ROLE.sql:ro
       - ./db/pessoais/triggers.sql:/docker-entrypoint-initdb.d/03-triggers.sql:ro
       - ./db/pessoais:/opt/seed-db:ro
     healthcheck:
