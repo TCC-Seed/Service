@@ -1,3 +1,11 @@
+-- --------------------------------------------------------------------------------------
+-- Data de Criação ........: 14/09/2026                                                --
+-- Autor(es) ..............: João Ginuino e Gabriela Lemos                             --
+-- Versão .................: 1.0                                                       --
+-- Banco de Dados .........: PostgreSQL                                                --
+-- Descrição ..............: Remoção das tabelas e tipos de dados pessoais do Seed.    --
+-- --------------------------------------------------------------------------------------
+
 BEGIN TRANSACTION;
 
     DROP TABLE FUNCIONARIO;
