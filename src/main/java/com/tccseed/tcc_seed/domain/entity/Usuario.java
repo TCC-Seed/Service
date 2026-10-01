@@ -44,6 +44,6 @@ public abstract class Usuario {
     @Column(name = "tipo", nullable = false, columnDefinition = "tipo_usuario")
     private TipoUsuario tipo;
 
-    @Column(name = "token", nullable = false, updatable = false)
+    @Column(name = "token", nullable = false)
     private UUID token;
 }
