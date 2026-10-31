@@ -10,15 +10,38 @@ BEGIN TRANSACTION;
 
     CREATE TYPE TIPO_USUARIO AS ENUM('estudante', 'funcionario');
     CREATE TYPE GENERO AS ENUM ('feminino', 'masculino', 'nao_informar', 'outro');
-    CREATE DOMAIN EMAIL AS VARCHAR(254)
-        CHECK (VALUE ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$');
+    CREATE DOMAIN EMAIL AS VARCHAR(254) CHECK (VALUE ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$');
 
     CREATE TABLE IES (
         id SMALLSERIAL NOT NULL,
         nome VARCHAR(200) NOT NULL,
         regiao_administrativa VARCHAR(100),
-        chave_vinculo VARCHAR(43) NOT NULL,
         PRIMARY KEY (id)
+    );
+
+    CREATE TABLE EVENTO (
+        id_evento SERIAL NOT NULL,
+        data_inicio DATE NOT NULL,
+        data_fim DATE,
+        link VARCHAR(500),
+        descricao TEXT,
+        PRIMARY KEY (id_evento),
+        CHECK (data_fim IS NULL OR data_fim >= data_inicio)
+    );
+
+    CREATE TABLE CATEGORIA_EVENTO (
+        id_evento INTEGER NOT NULL,
+        categoria VARCHAR(100) NOT NULL,
+        PRIMARY KEY (id_evento, categoria),
+        FOREIGN KEY (id_evento) REFERENCES EVENTO (id_evento) ON DELETE CASCADE
+    );
+
+    CREATE TABLE EVENTO_IES (
+        id_ies SMALLINT NOT NULL,
+        id_evento INTEGER NOT NULL,
+        PRIMARY KEY (id_ies, id_evento),
+        FOREIGN KEY (id_ies) REFERENCES IES (id) ON DELETE CASCADE,
+        FOREIGN KEY (id_evento) REFERENCES EVENTO (id_evento) ON DELETE CASCADE
     );
 
     CREATE TABLE USUARIO(
