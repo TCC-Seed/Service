@@ -67,7 +67,8 @@ CREATE TABLE USUARIO
     token    UUID         NOT NULL DEFAULT gen_random_uuid(),
     CONSTRAINT pk_usuario PRIMARY KEY (id),
     CONSTRAINT uk_usuario_email UNIQUE (email),
-    CONSTRAINT uk_usuario_username UNIQUE (username)
+    CONSTRAINT uk_usuario_username UNIQUE (username),
+    CONSTRAINT uk_usuario_token UNIQUE (token)
 );
 
 CREATE TABLE ESTUDANTE
