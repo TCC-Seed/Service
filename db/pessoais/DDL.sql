@@ -11,165 +11,203 @@ BEGIN TRANSACTION;
 -----------------------------------------------------------
 -- Tipos
 
-    CREATE TYPE TIPO_USUARIO AS ENUM('estudante', 'funcionario');
-    CREATE TYPE GENERO AS ENUM ('feminino', 'masculino', 'nao_informar', 'outro');
-    CREATE DOMAIN EMAIL AS VARCHAR(254) CHECK (VALUE ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$');
-
+CREATE TYPE TIPO_USUARIO AS ENUM ('estudante', 'funcionario');
+CREATE TYPE GENERO AS ENUM ('feminino', 'masculino', 'nao_informar', 'outro');
+CREATE DOMAIN EMAIL AS VARCHAR(254) CHECK (VALUE ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$');
 
 -----------------------------------------------------------
 -- Tabelas
 
-    CREATE TABLE IES (
-        id SMALLSERIAL NOT NULL,
-        nome VARCHAR(200) NOT NULL,
-        regiao_administrativa VARCHAR(100),
-        PRIMARY KEY (id)
-    );
+CREATE TABLE IES
+(
+    id                    SMALLSERIAL  NOT NULL,
+    nome                  VARCHAR(200) NOT NULL,
+    regiao_administrativa VARCHAR(100),
+    CONSTRAINT pk_ies PRIMARY KEY (id)
+);
 
-    CREATE TABLE EVENTO (
-        id SERIAL NOT NULL,
-        data_inicio DATE NOT NULL,
-        data_fim DATE,
-        link VARCHAR(500),
-        descricao TEXT,
-        PRIMARY KEY (id),
-        CHECK (data_fim IS NULL OR data_fim >= data_inicio)
-    );
+CREATE TABLE EVENTO
+(
+    id          SERIAL NOT NULL,
+    data_inicio DATE   NOT NULL,
+    data_fim    DATE,
+    link        VARCHAR(500),
+    descricao   TEXT,
+    CONSTRAINT pk_evento PRIMARY KEY (id),
+    CONSTRAINT ck_evento_datas CHECK (data_fim IS NULL OR data_fim >= data_inicio)
+);
 
-    CREATE TABLE CATEGORIA_EVENTO (
-        id_evento INTEGER NOT NULL,
-        categoria VARCHAR(100) NOT NULL,
-        PRIMARY KEY (id_evento, categoria),
-        FOREIGN KEY (id_evento) REFERENCES EVENTO (id) ON DELETE CASCADE
-    );
+CREATE TABLE CATEGORIA_EVENTO
+(
+    id_evento INTEGER      NOT NULL,
+    categoria VARCHAR(100) NOT NULL,
+    CONSTRAINT pk_categoria_evento PRIMARY KEY (id_evento, categoria),
+    CONSTRAINT fk_categoria_evento_evento FOREIGN KEY (id_evento)
+        REFERENCES EVENTO (id) ON DELETE CASCADE
+);
 
-    CREATE TABLE EVENTO_IES (
-        id_ies SMALLINT NOT NULL,
-        id_evento INTEGER NOT NULL,
-        PRIMARY KEY (id_ies, id_evento),
-        FOREIGN KEY (id_ies) REFERENCES IES (id) ON DELETE CASCADE,
-        FOREIGN KEY (id_evento) REFERENCES EVENTO (id) ON DELETE CASCADE
-    );
+CREATE TABLE EVENTO_IES
+(
+    id_ies    SMALLINT NOT NULL,
+    id_evento INTEGER  NOT NULL,
+    CONSTRAINT pk_evento_ies PRIMARY KEY (id_ies, id_evento),
+    CONSTRAINT fk_evento_ies_ies FOREIGN KEY (id_ies)
+        REFERENCES IES (id) ON DELETE CASCADE,
+    CONSTRAINT fk_evento_ies_evento FOREIGN KEY (id_evento)
+        REFERENCES EVENTO (id) ON DELETE CASCADE
+);
 
-    CREATE TABLE USUARIO(
-        id SERIAL NOT NULL,
-        email EMAIL NOT NULL,
-        username VARCHAR(50) NOT NULL,
-        senha TEXT NOT NULL,
-        tipo TIPO_USUARIO NOT NULL,
-        token UUID NOT NULL DEFAULT gen_random_uuid(),
-        PRIMARY KEY (id),
-        UNIQUE (email),
-        CONSTRAINT uk_usuario_username UNIQUE (username)
-    );
+CREATE TABLE USUARIO
+(
+    id       SERIAL       NOT NULL,
+    email    EMAIL        NOT NULL,
+    username VARCHAR(50)  NOT NULL,
+    senha    TEXT         NOT NULL,
+    tipo     TIPO_USUARIO NOT NULL,
+    token    UUID         NOT NULL DEFAULT gen_random_uuid(),
+    CONSTRAINT pk_usuario PRIMARY KEY (id),
+    CONSTRAINT uk_usuario_email UNIQUE (email),
+    CONSTRAINT uk_usuario_username UNIQUE (username)
+);
 
-    CREATE TABLE ESTUDANTE (
-        id INTEGER NOT NULL,
-        nome VARCHAR(200) NOT NULL,
-        matricula VARCHAR(30) NOT NULL,
-        nascimento DATE NOT NULL,
-        genero GENERO,
-        pais_origem VARCHAR(50) NOT NULL,
-        ies_id BIGINT NOT NULL,
-        PRIMARY KEY (id),
-        FOREIGN KEY (id) REFERENCES USUARIO(id) ON DELETE CASCADE,
-        CONSTRAINT fk_estudante_ies FOREIGN KEY (ies_id) REFERENCES IES(id),
-        UNIQUE (matricula)
-    );
+CREATE TABLE ESTUDANTE
+(
+    id          INTEGER      NOT NULL,
+    nome        VARCHAR(200) NOT NULL,
+    matricula   VARCHAR(30)  NOT NULL,
+    nascimento  DATE         NOT NULL,
+    genero      GENERO,
+    pais_origem VARCHAR(50)  NOT NULL,
+    id_ies      SMALLINT     NOT NULL,
+    CONSTRAINT pk_estudante PRIMARY KEY (id),
+    CONSTRAINT uk_estudante_matricula UNIQUE (matricula),
+    CONSTRAINT fk_estudante_usuario FOREIGN KEY (id)
+        REFERENCES USUARIO (id) ON DELETE CASCADE,
+    CONSTRAINT fk_estudante_ies FOREIGN KEY (id_ies)
+        REFERENCES IES (id)
+);
 
-    CREATE TABLE FUNCIONARIO(
-        id INTEGER NOT NULL,
-        nome VARCHAR(200) NOT NULL,
-        formacao VARCHAR(200) NOT NULL,
-        ies_id BIGINT NOT NULL,
-        PRIMARY KEY (id),
-        FOREIGN KEY (id) REFERENCES USUARIO(id) ON DELETE CASCADE,
-        CONSTRAINT fk_funcionario_ies FOREIGN KEY (ies_id) REFERENCES IES(id)
-    );
+CREATE TABLE FUNCIONARIO
+(
+    id       INTEGER      NOT NULL,
+    nome     VARCHAR(200) NOT NULL,
+    formacao VARCHAR(200) NOT NULL,
+    id_ies   SMALLINT     NOT NULL,
+    CONSTRAINT pk_funcionario PRIMARY KEY (id),
+    CONSTRAINT fk_funcionario_usuario FOREIGN KEY (id)
+        REFERENCES USUARIO (id) ON DELETE CASCADE,
+    CONSTRAINT fk_funcionario_ies FOREIGN KEY (id_ies)
+        REFERENCES IES (id)
+);
 
-    CREATE TABLE FORMULARIO_BASE (
-        id_base SERIAL NOT NULL,
-        id_estudante INTEGER NOT NULL,
-        data DATE NOT NULL DEFAULT CURRENT_DATE,
-        anotacao TEXT,
-        secao_autoconhecimento BOOLEAN NOT NULL DEFAULT FALSE,
-        secao_hidratacao BOOLEAN NOT NULL DEFAULT FALSE,
-        secao_exercicios BOOLEAN NOT NULL DEFAULT FALSE,
-        secao_alimentacao BOOLEAN NOT NULL DEFAULT FALSE,
-        secao_academia BOOLEAN NOT NULL DEFAULT FALSE,
-        secao_mental BOOLEAN NOT NULL DEFAULT FALSE,
-        secao_trabalho BOOLEAN NOT NULL DEFAULT FALSE,
-        secao_social BOOLEAN NOT NULL DEFAULT FALSE,
-        secao_sono BOOLEAN NOT NULL DEFAULT FALSE,
-        secao_lazer BOOLEAN NOT NULL DEFAULT FALSE,
-        secao_cultura BOOLEAN NOT NULL DEFAULT FALSE,
-        secao_financeiro BOOLEAN NOT NULL DEFAULT FALSE,
-        secao_amoroso BOOLEAN NOT NULL DEFAULT FALSE,
-        secao_acess BOOLEAN NOT NULL DEFAULT FALSE,
-        PRIMARY KEY (id_base),
-        FOREIGN KEY (id_estudante) REFERENCES ESTUDANTE (id) ON DELETE CASCADE
-    );
+CREATE TABLE FORMULARIO_BASE
+(
+    id                     SERIAL  NOT NULL,
+    id_estudante           INTEGER NOT NULL,
+    data_preenchimento     DATE    NOT NULL DEFAULT CURRENT_DATE,
+    anotacao               TEXT,
+    secao_autoconhecimento BOOLEAN NOT NULL DEFAULT FALSE,
+    secao_hidratacao       BOOLEAN NOT NULL DEFAULT FALSE,
+    secao_exercicios       BOOLEAN NOT NULL DEFAULT FALSE,
+    secao_alimentacao      BOOLEAN NOT NULL DEFAULT FALSE,
+    secao_academia         BOOLEAN NOT NULL DEFAULT FALSE,
+    secao_mental           BOOLEAN NOT NULL DEFAULT FALSE,
+    secao_trabalho         BOOLEAN NOT NULL DEFAULT FALSE,
+    secao_social           BOOLEAN NOT NULL DEFAULT FALSE,
+    secao_sono             BOOLEAN NOT NULL DEFAULT FALSE,
+    secao_lazer            BOOLEAN NOT NULL DEFAULT FALSE,
+    secao_cultura          BOOLEAN NOT NULL DEFAULT FALSE,
+    secao_financeiro       BOOLEAN NOT NULL DEFAULT FALSE,
+    secao_amoroso          BOOLEAN NOT NULL DEFAULT FALSE,
+    secao_acess            BOOLEAN NOT NULL DEFAULT FALSE,
+    CONSTRAINT pk_formulario_base PRIMARY KEY (id),
+    CONSTRAINT fk_formulario_base_estudante FOREIGN KEY (id_estudante)
+        REFERENCES ESTUDANTE (id) ON DELETE CASCADE
+);
 
-    CREATE TABLE FORMULARIO_PERSONALIZADO (
-        id SERIAL NOT NULL,
-        titulo VARCHAR(100) NOT NULL,
-        PRIMARY KEY (id)
-    );
+CREATE TABLE FORMULARIO_PERSONALIZADO
+(
+    id     SERIAL       NOT NULL,
+    titulo VARCHAR(100) NOT NULL,
+    CONSTRAINT pk_formulario_personalizado PRIMARY KEY (id)
+);
 
-    CREATE TABLE PERGUNTA_FORMULARIO_PERSONALIZADO (
-        id SERIAL NOT NULL,
-        enunciado TEXT NOT NULL,
-        PRIMARY KEY (id)
-    );
+CREATE TABLE PERGUNTA_FORMULARIO_PERSONALIZADO
+(
+    id        SERIAL NOT NULL,
+    enunciado TEXT   NOT NULL,
+    CONSTRAINT pk_pergunta_formulario_personalizado PRIMARY KEY (id)
+);
 
-    CREATE TABLE FORMULARIO_PERGUNTA (
-        id_formulario_personalizado INTEGER NOT NULL,
-        id_pergunta INTEGER NOT NULL,
-        PRIMARY KEY (id_formulario_personalizado, id_pergunta),
-        FOREIGN KEY (id_formulario_personalizado) REFERENCES FORMULARIO_PERSONALIZADO (id) ON DELETE CASCADE,
-        FOREIGN KEY (id_pergunta) REFERENCES PERGUNTA_FORMULARIO_PERSONALIZADO (id) ON DELETE CASCADE
-    );
+CREATE TABLE FORMULARIO_PERGUNTA
+(
+    id_formulario_personalizado INTEGER NOT NULL,
+    id_pergunta                 INTEGER NOT NULL,
+    CONSTRAINT pk_formulario_pergunta PRIMARY KEY (id_formulario_personalizado, id_pergunta),
+    CONSTRAINT fk_formulario_pergunta_formulario FOREIGN KEY (id_formulario_personalizado)
+        REFERENCES FORMULARIO_PERSONALIZADO (id) ON DELETE CASCADE,
+    CONSTRAINT fk_formulario_pergunta_pergunta FOREIGN KEY (id_pergunta)
+        REFERENCES PERGUNTA_FORMULARIO_PERSONALIZADO (id) ON DELETE CASCADE
+);
 
-    CREATE TABLE RESPOSTA_FORMULARIO_PERSONALIZADO (
-        id SERIAL NOT NULL,
-        id_usuario INTEGER NOT NULL,
-        id_formulario_personalizado INTEGER NOT NULL,
-        data DATE NOT NULL DEFAULT CURRENT_DATE,
-        PRIMARY KEY (id),
-        FOREIGN KEY (id_usuario) REFERENCES USUARIO (id) ON DELETE CASCADE,
-        FOREIGN KEY (id_formulario_personalizado) REFERENCES FORMULARIO_PERSONALIZADO (id) ON DELETE CASCADE
-    );
+CREATE TABLE RESPOSTA_FORMULARIO_PERSONALIZADO
+(
+    id                          SERIAL  NOT NULL,
+    id_usuario                  INTEGER NOT NULL,
+    id_formulario_personalizado INTEGER NOT NULL,
+    data_preenchimento          DATE    NOT NULL DEFAULT CURRENT_DATE,
+    CONSTRAINT pk_resposta_formulario_personalizado PRIMARY KEY (id),
+    CONSTRAINT fk_resposta_formulario_usuario FOREIGN KEY (id_usuario)
+        REFERENCES USUARIO (id) ON DELETE CASCADE,
+    CONSTRAINT fk_resposta_formulario_formulario FOREIGN KEY (id_formulario_personalizado)
+        REFERENCES FORMULARIO_PERSONALIZADO (id) ON DELETE CASCADE
+);
 
-    CREATE TABLE ITEM_RESPOSTA_FORMULARIO_PERSONALIZADO (
-        id_resposta INTEGER NOT NULL,
-        id_pergunta INTEGER NOT NULL,
-        resposta TEXT,
-        PRIMARY KEY (id_resposta, id_pergunta),
-        FOREIGN KEY (id_resposta) REFERENCES RESPOSTA_FORMULARIO_PERSONALIZADO (id) ON DELETE CASCADE,
-        FOREIGN KEY (id_pergunta) REFERENCES FORMULARIO_PERGUNTA (id_pergunta) ON DELETE CASCADE
-    );
+CREATE TABLE ITEM_RESPOSTA_FORMULARIO_PERSONALIZADO
+(
+    id_resposta INTEGER NOT NULL,
+    id_pergunta INTEGER NOT NULL,
+    resposta    TEXT,
+    CONSTRAINT pk_item_resposta_formulario_personalizado PRIMARY KEY (id_resposta, id_pergunta),
+    CONSTRAINT fk_item_resposta_resposta FOREIGN KEY (id_resposta)
+        REFERENCES RESPOSTA_FORMULARIO_PERSONALIZADO (id) ON DELETE CASCADE,
+    CONSTRAINT fk_item_resposta_pergunta FOREIGN KEY (id_pergunta)
+        REFERENCES PERGUNTA_FORMULARIO_PERSONALIZADO (id) ON DELETE CASCADE
+);
 
-    CREATE TABLE PUBLICACAO (
-        id SERIAL NOT NULL,
-        id_funcionario INTEGER NOT NULL,
-        titulo VARCHAR(200) NOT NULL,
-        descricao TEXT,
-        data DATE NOT NULL DEFAULT CURRENT_DATE,
-        PRIMARY KEY (id),
-        FOREIGN KEY (id_funcionario) REFERENCES FUNCIONARIO (id) ON DELETE CASCADE
-    );
+CREATE TABLE PUBLICACAO
+(
+    id              SERIAL       NOT NULL,
+    id_funcionario  INTEGER      NOT NULL,
+    titulo          VARCHAR(200) NOT NULL,
+    descricao       TEXT,
+    data_publicacao DATE         NOT NULL DEFAULT CURRENT_DATE,
+    CONSTRAINT pk_publicacao PRIMARY KEY (id),
+    CONSTRAINT fk_publicacao_funcionario FOREIGN KEY (id_funcionario)
+        REFERENCES FUNCIONARIO (id) ON DELETE CASCADE
+);
 
-    CREATE TABLE CATEGORIA_PUBLICACAO (
-        id_publicacao INTEGER NOT NULL,
-        categoria VARCHAR(100) NOT NULL,
-        PRIMARY KEY (id_publicacao, categoria),
-        FOREIGN KEY (id_publicacao) REFERENCES PUBLICACAO (id) ON DELETE CASCADE
-    );
+CREATE TABLE CATEGORIA_PUBLICACAO
+(
+    id_publicacao INTEGER      NOT NULL,
+    categoria     VARCHAR(100) NOT NULL,
+    CONSTRAINT pk_categoria_publicacao PRIMARY KEY (id_publicacao, categoria),
+    CONSTRAINT fk_categoria_publicacao_publicacao FOREIGN KEY (id_publicacao)
+        REFERENCES PUBLICACAO (id) ON DELETE CASCADE
+);
+
 
 -----------------------------------------------------------
--- Index
+-- Índices
 
-    CREATE INDEX idx_estudante_ies ON ESTUDANTE(ies_id);
-    CREATE INDEX idx_funcionario_ies ON FUNCIONARIO(ies_id);
+CREATE INDEX idx_estudante_id_ies ON ESTUDANTE (id_ies);
+CREATE INDEX idx_funcionario_id_ies ON FUNCIONARIO (id_ies);
+CREATE INDEX idx_evento_ies_id_evento ON EVENTO_IES (id_evento);
+CREATE INDEX idx_formulario_base_id_estudante ON FORMULARIO_BASE (id_estudante);
+CREATE INDEX idx_formulario_pergunta_id_pergunta ON FORMULARIO_PERGUNTA (id_pergunta);
+CREATE INDEX idx_resposta_formulario_id_usuario ON RESPOSTA_FORMULARIO_PERSONALIZADO (id_usuario);
+CREATE INDEX idx_resposta_formulario_id_formulario ON RESPOSTA_FORMULARIO_PERSONALIZADO (id_formulario_personalizado);
+CREATE INDEX idx_item_resposta_id_pergunta ON ITEM_RESPOSTA_FORMULARIO_PERSONALIZADO (id_pergunta);
+CREATE INDEX idx_publicacao_id_funcionario ON PUBLICACAO (id_funcionario);
 
 COMMIT;
