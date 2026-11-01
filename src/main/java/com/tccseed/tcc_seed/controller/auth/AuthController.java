@@ -1,6 +1,7 @@
 package com.tccseed.tcc_seed.controller.auth;
 
 import com.tccseed.tcc_seed.controller.auth.dto.EstudanteCadastroRequest;
+import com.tccseed.tcc_seed.controller.auth.dto.CsrfTokenResponse;
 import com.tccseed.tcc_seed.controller.auth.dto.FuncionarioCadastroRequest;
 import com.tccseed.tcc_seed.controller.auth.dto.LoginRequest;
 import com.tccseed.tcc_seed.controller.auth.dto.UsuarioResponse;
@@ -18,6 +19,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.CacheControl;
+import org.springframework.security.web.csrf.CsrfToken;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -29,6 +33,13 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController {
 
     private final AuthService authService;
+
+//    @GetMapping("/csrf")
+//    public ResponseEntity<CsrfTokenResponse> csrfToken(CsrfToken csrfToken) {
+//        return ResponseEntity.ok()
+//                .cacheControl(CacheControl.noStore())
+//                .body(new CsrfTokenResponse(csrfToken.getToken(), csrfToken.getHeaderName()));
+//    }
 
     @PostMapping("/login")
     public ResponseEntity<UsuarioResponse> login(@Valid @RequestBody LoginRequest request) {
