@@ -1,5 +1,6 @@
 package com.tccseed.tcc_seed.controller.evento;
 
+import com.tccseed.tcc_seed.controller.evento.dto.CategoriaEventoRequest;
 import com.tccseed.tcc_seed.domain.entity.CategoriaEvento;
 import com.tccseed.tcc_seed.domain.entity.id.CategoriaEventoId;
 import com.tccseed.tcc_seed.service.evento.CategoriaEventoService;
@@ -23,6 +24,10 @@ class CategoriaEventoControllerTest {
     private final CategoriaEvento entidade = new CategoriaEvento();
     private final CategoriaEventoId expectedId = new CategoriaEventoId();
 
+    private CategoriaEventoRequest request() {
+        return new CategoriaEventoRequest(null, null);
+    }
+
     @BeforeEach
     void preparar() {
         controller = new CategoriaEventoController(service);
@@ -32,11 +37,11 @@ class CategoriaEventoControllerTest {
 
     @Test
     void criarDelegaAoServiceERetorna201() {
-        when(service.criar(entidade)).thenReturn(entidade);
-        ResponseEntity<CategoriaEvento> response = controller.criar(entidade);
+        when(service.criar(any(CategoriaEvento.class))).thenReturn(entidade);
+        ResponseEntity<CategoriaEvento> response = controller.criar(request());
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
         assertSame(entidade, response.getBody());
-        verify(service).criar(entidade);
+        verify(service).criar(any(CategoriaEvento.class));
     }
 
     @Test
@@ -55,9 +60,9 @@ class CategoriaEventoControllerTest {
 
     @Test
     void atualizarDelegaAoService() {
-        when(service.atualizar(expectedId, entidade)).thenReturn(entidade);
-        assertSame(entidade, controller.atualizar(10L, "bem-estar", entidade));
-        verify(service).atualizar(expectedId, entidade);
+        when(service.atualizar(eq(expectedId), any(CategoriaEvento.class))).thenReturn(entidade);
+        assertSame(entidade, controller.atualizar(10L, "bem-estar", request()));
+        verify(service).atualizar(eq(expectedId), any(CategoriaEvento.class));
     }
 
     @Test

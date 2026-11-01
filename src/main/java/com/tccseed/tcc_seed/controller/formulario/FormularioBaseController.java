@@ -1,6 +1,7 @@
 package com.tccseed.tcc_seed.controller.formulario;
 
 import com.tccseed.tcc_seed.domain.entity.FormularioBase;
+import com.tccseed.tcc_seed.controller.formulario.dto.FormularioBaseRequest;
 import com.tccseed.tcc_seed.service.formulario.FormularioBaseService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -15,8 +16,8 @@ public class FormularioBaseController {
     private final FormularioBaseService service;
 
     @PostMapping
-    public ResponseEntity<FormularioBase> criar(@RequestBody FormularioBase entidade) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(service.criar(entidade));
+    public ResponseEntity<FormularioBase> criar(@RequestBody FormularioBaseRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.criar(request.toEntity()));
     }
 
     @GetMapping
@@ -30,8 +31,8 @@ public class FormularioBaseController {
     }
 
     @PutMapping("/{id}")
-    public FormularioBase atualizar(@PathVariable Long id, @RequestBody FormularioBase entidade) {
-        return service.atualizar(id, entidade);
+    public FormularioBase atualizar(@PathVariable Long id, @RequestBody FormularioBaseRequest request) {
+        return service.atualizar(id, request.toEntity());
     }
 
     @DeleteMapping("/{id}")

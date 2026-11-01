@@ -1,5 +1,6 @@
 package com.tccseed.tcc_seed.controller.formulario;
 
+import com.tccseed.tcc_seed.controller.formulario.dto.RespostaFormularioPersonalizadoRequest;
 import com.tccseed.tcc_seed.domain.entity.RespostaFormularioPersonalizado;
 import com.tccseed.tcc_seed.service.formulario.RespostaFormularioPersonalizadoService;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,22 +19,27 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class RespostaFormularioPersonalizadoControllerTest {
     @Mock private RespostaFormularioPersonalizadoService service;
+    @Mock private jakarta.persistence.EntityManager entityManager;
     private RespostaFormularioPersonalizadoController controller;
     private final RespostaFormularioPersonalizado entidade = new RespostaFormularioPersonalizado();
     private final Long id = 1L;
 
+    private RespostaFormularioPersonalizadoRequest request() {
+        return new RespostaFormularioPersonalizadoRequest(null, null, null);
+    }
+
     @BeforeEach
     void preparar() {
-        controller = new RespostaFormularioPersonalizadoController(service);
+        controller = new RespostaFormularioPersonalizadoController(service, entityManager);
     }
 
     @Test
     void criarDelegaAoServiceERetorna201() {
-        when(service.criar(entidade)).thenReturn(entidade);
-        ResponseEntity<RespostaFormularioPersonalizado> response = controller.criar(entidade);
+        when(service.criar(any(RespostaFormularioPersonalizado.class))).thenReturn(entidade);
+        ResponseEntity<RespostaFormularioPersonalizado> response = controller.criar(request());
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
         assertSame(entidade, response.getBody());
-        verify(service).criar(entidade);
+        verify(service).criar(any(RespostaFormularioPersonalizado.class));
     }
 
     @Test
@@ -52,9 +58,9 @@ class RespostaFormularioPersonalizadoControllerTest {
 
     @Test
     void atualizarDelegaAoService() {
-        when(service.atualizar(1L, entidade)).thenReturn(entidade);
-        assertSame(entidade, controller.atualizar(1L, entidade));
-        verify(service).atualizar(1L, entidade);
+        when(service.atualizar(eq(1L), any(RespostaFormularioPersonalizado.class))).thenReturn(entidade);
+        assertSame(entidade, controller.atualizar(1L, request()));
+        verify(service).atualizar(eq(1L), any(RespostaFormularioPersonalizado.class));
     }
 
     @Test

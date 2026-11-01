@@ -1,5 +1,6 @@
 package com.tccseed.tcc_seed.controller.formulario;
 
+import com.tccseed.tcc_seed.controller.formulario.dto.FormularioPerguntaRequest;
 import com.tccseed.tcc_seed.domain.entity.FormularioPergunta;
 import com.tccseed.tcc_seed.domain.entity.id.FormularioPerguntaId;
 import com.tccseed.tcc_seed.service.formulario.FormularioPerguntaService;
@@ -23,6 +24,10 @@ class FormularioPerguntaControllerTest {
     private final FormularioPergunta entidade = new FormularioPergunta();
     private final FormularioPerguntaId expectedId = new FormularioPerguntaId();
 
+    private FormularioPerguntaRequest request() {
+        return new FormularioPerguntaRequest(null, null);
+    }
+
     @BeforeEach
     void preparar() {
         controller = new FormularioPerguntaController(service);
@@ -32,11 +37,11 @@ class FormularioPerguntaControllerTest {
 
     @Test
     void criarDelegaAoServiceERetorna201() {
-        when(service.criar(entidade)).thenReturn(entidade);
-        ResponseEntity<FormularioPergunta> response = controller.criar(entidade);
+        when(service.criar(any(FormularioPergunta.class))).thenReturn(entidade);
+        ResponseEntity<FormularioPergunta> response = controller.criar(request());
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
         assertSame(entidade, response.getBody());
-        verify(service).criar(entidade);
+        verify(service).criar(any(FormularioPergunta.class));
     }
 
     @Test
@@ -55,9 +60,9 @@ class FormularioPerguntaControllerTest {
 
     @Test
     void atualizarDelegaAoService() {
-        when(service.atualizar(expectedId, entidade)).thenReturn(entidade);
-        assertSame(entidade, controller.atualizar(10L, 10L, entidade));
-        verify(service).atualizar(expectedId, entidade);
+        when(service.atualizar(eq(expectedId), any(FormularioPergunta.class))).thenReturn(entidade);
+        assertSame(entidade, controller.atualizar(10L, 10L, request()));
+        verify(service).atualizar(eq(expectedId), any(FormularioPergunta.class));
     }
 
     @Test

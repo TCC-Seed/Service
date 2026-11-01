@@ -1,6 +1,7 @@
 package com.tccseed.tcc_seed.controller.publicacao;
 
 import com.tccseed.tcc_seed.domain.entity.Publicacao;
+import com.tccseed.tcc_seed.controller.publicacao.dto.PublicacaoRequest;
 import com.tccseed.tcc_seed.service.publicacao.PublicacaoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -15,8 +16,8 @@ public class PublicacaoController {
     private final PublicacaoService service;
 
     @PostMapping
-    public ResponseEntity<Publicacao> criar(@RequestBody Publicacao entidade) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(service.criar(entidade));
+    public ResponseEntity<Publicacao> criar(@RequestBody PublicacaoRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.criar(request.toEntity()));
     }
 
     @GetMapping
@@ -30,8 +31,8 @@ public class PublicacaoController {
     }
 
     @PutMapping("/{id}")
-    public Publicacao atualizar(@PathVariable Long id, @RequestBody Publicacao entidade) {
-        return service.atualizar(id, entidade);
+    public Publicacao atualizar(@PathVariable Long id, @RequestBody PublicacaoRequest request) {
+        return service.atualizar(id, request.toEntity());
     }
 
     @DeleteMapping("/{id}")

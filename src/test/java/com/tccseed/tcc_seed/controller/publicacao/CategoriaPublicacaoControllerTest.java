@@ -1,5 +1,6 @@
 package com.tccseed.tcc_seed.controller.publicacao;
 
+import com.tccseed.tcc_seed.controller.publicacao.dto.CategoriaPublicacaoRequest;
 import com.tccseed.tcc_seed.domain.entity.CategoriaPublicacao;
 import com.tccseed.tcc_seed.domain.entity.id.CategoriaPublicacaoId;
 import com.tccseed.tcc_seed.service.publicacao.CategoriaPublicacaoService;
@@ -23,6 +24,10 @@ class CategoriaPublicacaoControllerTest {
     private final CategoriaPublicacao entidade = new CategoriaPublicacao();
     private final CategoriaPublicacaoId expectedId = new CategoriaPublicacaoId();
 
+    private CategoriaPublicacaoRequest request() {
+        return new CategoriaPublicacaoRequest(null, null);
+    }
+
     @BeforeEach
     void preparar() {
         controller = new CategoriaPublicacaoController(service);
@@ -32,11 +37,11 @@ class CategoriaPublicacaoControllerTest {
 
     @Test
     void criarDelegaAoServiceERetorna201() {
-        when(service.criar(entidade)).thenReturn(entidade);
-        ResponseEntity<CategoriaPublicacao> response = controller.criar(entidade);
+        when(service.criar(any(CategoriaPublicacao.class))).thenReturn(entidade);
+        ResponseEntity<CategoriaPublicacao> response = controller.criar(request());
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
         assertSame(entidade, response.getBody());
-        verify(service).criar(entidade);
+        verify(service).criar(any(CategoriaPublicacao.class));
     }
 
     @Test
@@ -55,9 +60,9 @@ class CategoriaPublicacaoControllerTest {
 
     @Test
     void atualizarDelegaAoService() {
-        when(service.atualizar(expectedId, entidade)).thenReturn(entidade);
-        assertSame(entidade, controller.atualizar(10L, "bem-estar", entidade));
-        verify(service).atualizar(expectedId, entidade);
+        when(service.atualizar(eq(expectedId), any(CategoriaPublicacao.class))).thenReturn(entidade);
+        assertSame(entidade, controller.atualizar(10L, "bem-estar", request()));
+        verify(service).atualizar(eq(expectedId), any(CategoriaPublicacao.class));
     }
 
     @Test

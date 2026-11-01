@@ -1,5 +1,6 @@
 package com.tccseed.tcc_seed.controller.evento;
 
+import com.tccseed.tcc_seed.controller.evento.dto.EventoRequest;
 import com.tccseed.tcc_seed.domain.entity.Evento;
 import com.tccseed.tcc_seed.service.evento.EventoService;
 import org.junit.jupiter.api.BeforeEach;
@@ -22,6 +23,10 @@ class EventoControllerTest {
     private final Evento entidade = new Evento();
     private final Long id = 1L;
 
+    private EventoRequest request() {
+        return new EventoRequest(null, null, null, null);
+    }
+
     @BeforeEach
     void preparar() {
         controller = new EventoController(service);
@@ -29,11 +34,11 @@ class EventoControllerTest {
 
     @Test
     void criarDelegaAoServiceERetorna201() {
-        when(service.criar(entidade)).thenReturn(entidade);
-        ResponseEntity<Evento> response = controller.criar(entidade);
+        when(service.criar(any(Evento.class))).thenReturn(entidade);
+        ResponseEntity<Evento> response = controller.criar(request());
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
         assertSame(entidade, response.getBody());
-        verify(service).criar(entidade);
+        verify(service).criar(any(Evento.class));
     }
 
     @Test
@@ -52,9 +57,9 @@ class EventoControllerTest {
 
     @Test
     void atualizarDelegaAoService() {
-        when(service.atualizar(1L, entidade)).thenReturn(entidade);
-        assertSame(entidade, controller.atualizar(1L, entidade));
-        verify(service).atualizar(1L, entidade);
+        when(service.atualizar(eq(1L), any(Evento.class))).thenReturn(entidade);
+        assertSame(entidade, controller.atualizar(1L, request()));
+        verify(service).atualizar(eq(1L), any(Evento.class));
     }
 
     @Test

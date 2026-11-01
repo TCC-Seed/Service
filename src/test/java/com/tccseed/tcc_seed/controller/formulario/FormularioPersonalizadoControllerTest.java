@@ -1,5 +1,6 @@
 package com.tccseed.tcc_seed.controller.formulario;
 
+import com.tccseed.tcc_seed.controller.formulario.dto.FormularioPersonalizadoRequest;
 import com.tccseed.tcc_seed.domain.entity.FormularioPersonalizado;
 import com.tccseed.tcc_seed.service.formulario.FormularioPersonalizadoService;
 import org.junit.jupiter.api.BeforeEach;
@@ -22,6 +23,10 @@ class FormularioPersonalizadoControllerTest {
     private final FormularioPersonalizado entidade = new FormularioPersonalizado();
     private final Long id = 1L;
 
+    private FormularioPersonalizadoRequest request() {
+        return new FormularioPersonalizadoRequest(null);
+    }
+
     @BeforeEach
     void preparar() {
         controller = new FormularioPersonalizadoController(service);
@@ -29,11 +34,11 @@ class FormularioPersonalizadoControllerTest {
 
     @Test
     void criarDelegaAoServiceERetorna201() {
-        when(service.criar(entidade)).thenReturn(entidade);
-        ResponseEntity<FormularioPersonalizado> response = controller.criar(entidade);
+        when(service.criar(any(FormularioPersonalizado.class))).thenReturn(entidade);
+        ResponseEntity<FormularioPersonalizado> response = controller.criar(request());
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
         assertSame(entidade, response.getBody());
-        verify(service).criar(entidade);
+        verify(service).criar(any(FormularioPersonalizado.class));
     }
 
     @Test
@@ -52,9 +57,9 @@ class FormularioPersonalizadoControllerTest {
 
     @Test
     void atualizarDelegaAoService() {
-        when(service.atualizar(1L, entidade)).thenReturn(entidade);
-        assertSame(entidade, controller.atualizar(1L, entidade));
-        verify(service).atualizar(1L, entidade);
+        when(service.atualizar(eq(1L), any(FormularioPersonalizado.class))).thenReturn(entidade);
+        assertSame(entidade, controller.atualizar(1L, request()));
+        verify(service).atualizar(eq(1L), any(FormularioPersonalizado.class));
     }
 
     @Test

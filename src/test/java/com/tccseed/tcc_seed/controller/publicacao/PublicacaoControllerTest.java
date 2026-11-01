@@ -1,5 +1,6 @@
 package com.tccseed.tcc_seed.controller.publicacao;
 
+import com.tccseed.tcc_seed.controller.publicacao.dto.PublicacaoRequest;
 import com.tccseed.tcc_seed.domain.entity.Publicacao;
 import com.tccseed.tcc_seed.service.publicacao.PublicacaoService;
 import org.junit.jupiter.api.BeforeEach;
@@ -22,6 +23,10 @@ class PublicacaoControllerTest {
     private final Publicacao entidade = new Publicacao();
     private final Long id = 1L;
 
+    private PublicacaoRequest request() {
+        return new PublicacaoRequest(null, null, null, null);
+    }
+
     @BeforeEach
     void preparar() {
         controller = new PublicacaoController(service);
@@ -29,11 +34,11 @@ class PublicacaoControllerTest {
 
     @Test
     void criarDelegaAoServiceERetorna201() {
-        when(service.criar(entidade)).thenReturn(entidade);
-        ResponseEntity<Publicacao> response = controller.criar(entidade);
+        when(service.criar(any(Publicacao.class))).thenReturn(entidade);
+        ResponseEntity<Publicacao> response = controller.criar(request());
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
         assertSame(entidade, response.getBody());
-        verify(service).criar(entidade);
+        verify(service).criar(any(Publicacao.class));
     }
 
     @Test
@@ -52,9 +57,9 @@ class PublicacaoControllerTest {
 
     @Test
     void atualizarDelegaAoService() {
-        when(service.atualizar(1L, entidade)).thenReturn(entidade);
-        assertSame(entidade, controller.atualizar(1L, entidade));
-        verify(service).atualizar(1L, entidade);
+        when(service.atualizar(eq(1L), any(Publicacao.class))).thenReturn(entidade);
+        assertSame(entidade, controller.atualizar(1L, request()));
+        verify(service).atualizar(eq(1L), any(Publicacao.class));
     }
 
     @Test

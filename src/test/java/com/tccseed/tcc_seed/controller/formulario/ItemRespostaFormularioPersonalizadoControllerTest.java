@@ -1,5 +1,6 @@
 package com.tccseed.tcc_seed.controller.formulario;
 
+import com.tccseed.tcc_seed.controller.formulario.dto.ItemRespostaFormularioPersonalizadoRequest;
 import com.tccseed.tcc_seed.domain.entity.ItemRespostaFormularioPersonalizado;
 import com.tccseed.tcc_seed.domain.entity.id.ItemRespostaFormularioPersonalizadoId;
 import com.tccseed.tcc_seed.service.formulario.ItemRespostaFormularioPersonalizadoService;
@@ -23,6 +24,10 @@ class ItemRespostaFormularioPersonalizadoControllerTest {
     private final ItemRespostaFormularioPersonalizado entidade = new ItemRespostaFormularioPersonalizado();
     private final ItemRespostaFormularioPersonalizadoId expectedId = new ItemRespostaFormularioPersonalizadoId();
 
+    private ItemRespostaFormularioPersonalizadoRequest request() {
+        return new ItemRespostaFormularioPersonalizadoRequest(null, null, null);
+    }
+
     @BeforeEach
     void preparar() {
         controller = new ItemRespostaFormularioPersonalizadoController(service);
@@ -32,11 +37,11 @@ class ItemRespostaFormularioPersonalizadoControllerTest {
 
     @Test
     void criarDelegaAoServiceERetorna201() {
-        when(service.criar(entidade)).thenReturn(entidade);
-        ResponseEntity<ItemRespostaFormularioPersonalizado> response = controller.criar(entidade);
+        when(service.criar(any(ItemRespostaFormularioPersonalizado.class))).thenReturn(entidade);
+        ResponseEntity<ItemRespostaFormularioPersonalizado> response = controller.criar(request());
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
         assertSame(entidade, response.getBody());
-        verify(service).criar(entidade);
+        verify(service).criar(any(ItemRespostaFormularioPersonalizado.class));
     }
 
     @Test
@@ -55,9 +60,9 @@ class ItemRespostaFormularioPersonalizadoControllerTest {
 
     @Test
     void atualizarDelegaAoService() {
-        when(service.atualizar(expectedId, entidade)).thenReturn(entidade);
-        assertSame(entidade, controller.atualizar(10L, 10L, entidade));
-        verify(service).atualizar(expectedId, entidade);
+        when(service.atualizar(eq(expectedId), any(ItemRespostaFormularioPersonalizado.class))).thenReturn(entidade);
+        assertSame(entidade, controller.atualizar(10L, 10L, request()));
+        verify(service).atualizar(eq(expectedId), any(ItemRespostaFormularioPersonalizado.class));
     }
 
     @Test

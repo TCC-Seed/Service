@@ -1,5 +1,6 @@
 package com.tccseed.tcc_seed.controller.formulario;
 
+import com.tccseed.tcc_seed.controller.formulario.dto.PerguntaFormularioPersonalizadoRequest;
 import com.tccseed.tcc_seed.domain.entity.PerguntaFormularioPersonalizado;
 import com.tccseed.tcc_seed.service.formulario.PerguntaFormularioPersonalizadoService;
 import org.junit.jupiter.api.BeforeEach;
@@ -22,6 +23,10 @@ class PerguntaFormularioPersonalizadoControllerTest {
     private final PerguntaFormularioPersonalizado entidade = new PerguntaFormularioPersonalizado();
     private final Long id = 1L;
 
+    private PerguntaFormularioPersonalizadoRequest request() {
+        return new PerguntaFormularioPersonalizadoRequest(null);
+    }
+
     @BeforeEach
     void preparar() {
         controller = new PerguntaFormularioPersonalizadoController(service);
@@ -29,11 +34,11 @@ class PerguntaFormularioPersonalizadoControllerTest {
 
     @Test
     void criarDelegaAoServiceERetorna201() {
-        when(service.criar(entidade)).thenReturn(entidade);
-        ResponseEntity<PerguntaFormularioPersonalizado> response = controller.criar(entidade);
+        when(service.criar(any(PerguntaFormularioPersonalizado.class))).thenReturn(entidade);
+        ResponseEntity<PerguntaFormularioPersonalizado> response = controller.criar(request());
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
         assertSame(entidade, response.getBody());
-        verify(service).criar(entidade);
+        verify(service).criar(any(PerguntaFormularioPersonalizado.class));
     }
 
     @Test
@@ -52,9 +57,9 @@ class PerguntaFormularioPersonalizadoControllerTest {
 
     @Test
     void atualizarDelegaAoService() {
-        when(service.atualizar(1L, entidade)).thenReturn(entidade);
-        assertSame(entidade, controller.atualizar(1L, entidade));
-        verify(service).atualizar(1L, entidade);
+        when(service.atualizar(eq(1L), any(PerguntaFormularioPersonalizado.class))).thenReturn(entidade);
+        assertSame(entidade, controller.atualizar(1L, request()));
+        verify(service).atualizar(eq(1L), any(PerguntaFormularioPersonalizado.class));
     }
 
     @Test

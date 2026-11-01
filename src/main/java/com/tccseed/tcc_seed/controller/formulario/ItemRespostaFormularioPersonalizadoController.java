@@ -1,6 +1,7 @@
 package com.tccseed.tcc_seed.controller.formulario;
 
 import com.tccseed.tcc_seed.domain.entity.ItemRespostaFormularioPersonalizado;
+import com.tccseed.tcc_seed.controller.formulario.dto.ItemRespostaFormularioPersonalizadoRequest;
 import com.tccseed.tcc_seed.domain.entity.id.ItemRespostaFormularioPersonalizadoId;
 import com.tccseed.tcc_seed.service.formulario.ItemRespostaFormularioPersonalizadoService;
 import lombok.RequiredArgsConstructor;
@@ -16,8 +17,8 @@ public class ItemRespostaFormularioPersonalizadoController {
     private final ItemRespostaFormularioPersonalizadoService service;
 
     @PostMapping
-    public ResponseEntity<ItemRespostaFormularioPersonalizado> criar(@RequestBody ItemRespostaFormularioPersonalizado entidade) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(service.criar(entidade));
+    public ResponseEntity<ItemRespostaFormularioPersonalizado> criar(@RequestBody ItemRespostaFormularioPersonalizadoRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.criar(request.toEntity()));
     }
 
     @GetMapping
@@ -31,8 +32,8 @@ public class ItemRespostaFormularioPersonalizadoController {
     }
 
     @PutMapping("/{idResposta}/{idPergunta}")
-    public ItemRespostaFormularioPersonalizado atualizar(@PathVariable Long idResposta, @PathVariable Long idPergunta, @RequestBody ItemRespostaFormularioPersonalizado entidade) {
-        return service.atualizar(id(idResposta, idPergunta), entidade);
+    public ItemRespostaFormularioPersonalizado atualizar(@PathVariable Long idResposta, @PathVariable Long idPergunta, @RequestBody ItemRespostaFormularioPersonalizadoRequest request) {
+        return service.atualizar(id(idResposta, idPergunta), request.toEntity());
     }
 
     @DeleteMapping("/{idResposta}/{idPergunta}")
