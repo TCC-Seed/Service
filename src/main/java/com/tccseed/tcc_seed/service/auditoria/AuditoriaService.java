@@ -13,19 +13,24 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(propagation = Propagation.MANDATORY)
 public class AuditoriaService {
 
-    private final EntityManager entityManager;
+  private final EntityManager entityManager;
 
-    public void identificarCadastroPublico() {
-        identificar("cadastro_publico", "", "");
-    }
+  public void identificarCadastroPublico() {
+    identificar("cadastro_publico", "", "");
+  }
 
-    public void identificarUsuario(Usuario usuario) {
-        identificar("usuario", usuario.getId().toString(), usuario.getUsername());
-    }
+  public void identificarUsuario(Usuario usuario) {
+    identificar("usuario", usuario.getId().toString(), usuario.getUsername());
+  }
 
-    private void identificar(String origem, String usuarioId, String username) {
-        entityManager.unwrap(Session.class).doWork(connection -> {
-            try (var statement = connection.prepareStatement("""
+  private void identificar(String origem, String usuarioId, String username) {
+    entityManager
+        .unwrap(Session.class)
+        .doWork(
+            connection -> {
+              try (var statement =
+                  connection.prepareStatement(
+                      """
                     SELECT set_config('seed.audit_origem', ?, true),
                            set_config('seed.audit_usuario_id', ?, true),
                            set_config('seed.audit_username', ?, true)
@@ -34,7 +39,7 @@ public class AuditoriaService {
                 statement.setString(2, usuarioId);
                 statement.setString(3, username);
                 statement.execute();
-            }
-        });
-    }
+              }
+            });
+  }
 }

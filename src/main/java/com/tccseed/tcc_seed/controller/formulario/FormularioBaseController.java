@@ -3,42 +3,49 @@ package com.tccseed.tcc_seed.controller.formulario;
 import com.tccseed.tcc_seed.controller.formulario.dto.FormularioBaseRequest;
 import com.tccseed.tcc_seed.domain.entity.FormularioBase;
 import com.tccseed.tcc_seed.service.formulario.FormularioBaseService;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/formularios-base")
 @RequiredArgsConstructor
 public class FormularioBaseController {
-    private final FormularioBaseService service;
+  private final FormularioBaseService service;
 
-    @PostMapping
-    public ResponseEntity<FormularioBase> criar(@RequestBody FormularioBaseRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(service.criar(request.toEntity()));
-    }
+  @PostMapping
+  public ResponseEntity<FormularioBase> criar(@RequestBody FormularioBaseRequest request) {
+    return ResponseEntity.status(HttpStatus.CREATED).body(service.criar(request.toEntity()));
+  }
 
-    @GetMapping
-    public List<FormularioBase> listar() {
-        return service.listar();
-    }
+  @GetMapping
+  public List<FormularioBase> listar() {
+    return service.listar();
+  }
 
-    @GetMapping("/{id}")
-    public FormularioBase buscarPorId(@PathVariable Long id) {
-        return service.buscarPorId(id);
-    }
+  @GetMapping("/{id}")
+  public FormularioBase buscarPorId(@PathVariable Long id) {
+    return service.buscarPorId(id);
+  }
 
-    @PutMapping("/{id}")
-    public FormularioBase atualizar(@PathVariable Long id, @RequestBody FormularioBaseRequest request) {
-        return service.atualizar(id, request.toEntity());
-    }
+  @PutMapping("/{id}")
+  public FormularioBase atualizar(
+      @PathVariable Long id, @RequestBody FormularioBaseRequest request) {
+    return service.atualizar(id, request.toEntity());
+  }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> excluir(@PathVariable Long id) {
-        service.excluir(id);
-        return ResponseEntity.noContent().build();
-    }
+  @DeleteMapping("/{id}")
+  public ResponseEntity<Void> excluir(@PathVariable Long id) {
+    service.excluir(id);
+    return ResponseEntity.noContent().build();
+  }
 }

@@ -3,47 +3,54 @@ package com.tccseed.tcc_seed.service.formulario;
 import com.tccseed.tcc_seed.domain.entity.ItemRespostaFormularioPersonalizado;
 import com.tccseed.tcc_seed.domain.entity.id.ItemRespostaFormularioPersonalizadoId;
 import com.tccseed.tcc_seed.repository.ItemRespostaFormularioPersonalizadoRepository;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.List;
-
 @Service
 @RequiredArgsConstructor
 @Transactional
 public class ItemRespostaFormularioPersonalizadoService {
-    private final ItemRespostaFormularioPersonalizadoRepository repository;
+  private final ItemRespostaFormularioPersonalizadoRepository repository;
 
-    public ItemRespostaFormularioPersonalizado criar(ItemRespostaFormularioPersonalizado entidade) {
-        return repository.save(entidade);
-    }
+  public ItemRespostaFormularioPersonalizado criar(ItemRespostaFormularioPersonalizado entidade) {
+    return repository.save(entidade);
+  }
 
-    @Transactional(readOnly = true)
-    public List<ItemRespostaFormularioPersonalizado> listar() {
-        return repository.findAll();
-    }
+  @Transactional(readOnly = true)
+  public List<ItemRespostaFormularioPersonalizado> listar() {
+    return repository.findAll();
+  }
 
-    @Transactional(readOnly = true)
-    public ItemRespostaFormularioPersonalizado buscarPorId(ItemRespostaFormularioPersonalizadoId id) {
-        return repository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "ItemRespostaFormularioPersonalizado não encontrado(a)."));
-    }
+  @Transactional(readOnly = true)
+  public ItemRespostaFormularioPersonalizado buscarPorId(ItemRespostaFormularioPersonalizadoId id) {
+    return repository
+        .findById(id)
+        .orElseThrow(
+            () ->
+                new ResponseStatusException(
+                    HttpStatus.NOT_FOUND,
+                    "ItemRespostaFormularioPersonalizado não encontrado(a)."));
+  }
 
-    public ItemRespostaFormularioPersonalizado atualizar(ItemRespostaFormularioPersonalizadoId id, ItemRespostaFormularioPersonalizado entidade) {
-        if (!repository.existsById(id)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "ItemRespostaFormularioPersonalizado não encontrado(a).");
-        }
-        entidade.setId(id);
-        return repository.save(entidade);
+  public ItemRespostaFormularioPersonalizado atualizar(
+      ItemRespostaFormularioPersonalizadoId id, ItemRespostaFormularioPersonalizado entidade) {
+    if (!repository.existsById(id)) {
+      throw new ResponseStatusException(
+          HttpStatus.NOT_FOUND, "ItemRespostaFormularioPersonalizado não encontrado(a).");
     }
+    entidade.setId(id);
+    return repository.save(entidade);
+  }
 
-    public void excluir(ItemRespostaFormularioPersonalizadoId id) {
-        if (!repository.existsById(id)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "ItemRespostaFormularioPersonalizado não encontrado(a).");
-        }
-        repository.deleteById(id);
+  public void excluir(ItemRespostaFormularioPersonalizadoId id) {
+    if (!repository.existsById(id)) {
+      throw new ResponseStatusException(
+          HttpStatus.NOT_FOUND, "ItemRespostaFormularioPersonalizado não encontrado(a).");
     }
+    repository.deleteById(id);
+  }
 }

@@ -3,16 +3,14 @@ package com.tccseed.tcc_seed.domain.enums;
 import lombok.Getter;
 
 public enum Genero {
+  FEMININO("feminino"),
+  MASCULINO("masculino"),
+  NAO_INFORMAR("nao_informar"),
+  OUTRO("outro");
 
-    FEMININO("feminino"),
-    MASCULINO("masculino"),
-    NAO_INFORMAR("nao_informar"),
-    OUTRO("outro");
+  @Getter private final String valor;
 
-    @Getter
-    private final String valor;
-
-    Genero(String valor) {
-        this.valor = valor;
-    }
+  Genero(String valor) {
+    this.valor = valor;
+  }
 }
