@@ -29,6 +29,8 @@ import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest(classes = AuthOpenApiTest.DocumentationApplication.class)
@@ -45,6 +47,26 @@ class AuthOpenApiTest {
     @MockitoBean JwtService jwtService;
     @Autowired MockMvc mvc;
     @Autowired JsonMapper mapper;
+
+    @Test
+    void csrfCookiePermiteObterTokenERejeitaPostSemToken() throws Exception {
+        var csrfResponse = mvc.perform(get("/auth/csrf"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.headerName").value("X-XSRF-TOKEN"))
+                .andReturn().getResponse();
+        var csrfCookie = csrfResponse.getCookie("XSRF-TOKEN");
+        assertNotNull(csrfCookie);
+        JsonNode csrfBody = mapper.readTree(csrfResponse.getContentAsString());
+        String token = csrfBody.path("token").asText();
+        assertFalse(token.isBlank());
+
+        mvc.perform(post("/auth/cadastro/estudante").contentType("application/json").content("{}"))
+                .andExpect(status().isForbidden());
+        mvc.perform(post("/auth/cadastro/estudante").cookie(csrfCookie)
+                        .header(csrfBody.path("headerName").asText(), token)
+                        .contentType("application/json").content("{}"))
+                .andExpect(status().isBadRequest());
+    }
 
     @Test
     void documentaCamposPermissoesEStatusReaisNoEndpointPublico() throws Exception {
