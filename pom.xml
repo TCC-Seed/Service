@@ -211,6 +211,7 @@
 						<excludeRoot>${project.build.directory}/generated-sources</excludeRoot>
 					</excludeRoots>
 					<failOnViolation>false</failOnViolation>
+					<printFailingErrors>true</printFailingErrors>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -238,7 +239,7 @@
 							<exclude>**/generated/**</exclude>
 						</excludes>
 						<googleJavaFormat>
-							<version>1.37.0</version>
+							<version>1.25.2</version>
 							<style>GOOGLE</style>
 						</googleJavaFormat>
 						<removeUnusedImports />
