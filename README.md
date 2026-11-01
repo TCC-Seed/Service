@@ -246,6 +246,109 @@ Usam mocks por subclasses para permitir execução em ambientes que restringem i
 A suíte acima não exige banco; rollback real, concorrência e migração precisam de validação com PostgreSQL.
 
 
+## Autogestão do estudante
+
+Todas as rotas abaixo usam o JWT do cookie `seed_cookie`, obtido no login. A conta
+é selecionada exclusivamente pelo token validado: não há ID de usuário na rota ou
+no corpo para escolher outro cadastro. O serviço verifica também se a conta
+persistida é de estudante; funcionários recebem 403.
+
+| Método e rota | Comportamento |
+| --- | --- |
+| `GET /estudante` | Retorna somente os próprios dados, sem credenciais, com `Cache-Control: no-store` |
+| `PATCH /estudante` | Edita parcialmente nome, nascimento, gênero, país de origem, e-mail, username e matrícula |
+| `PATCH /estudante/senha` | Exige `senhaAtual` e `novaSenha`; retorna 204, limpa o cookie e invalida todos os tokens anteriores |
+| `DELETE /estudante` | Exige `senhaAtual`; exclui estudante e usuário, preservando IES e auditoria; retorna 204 e limpa o cookie |
+
+A consulta retorna `id`, `email`, `username`, `nome`, `matricula`, `nascimento`,
+`genero`, `paisOrigem` e `iesId`. A IES é fixa. Campos desconhecidos ou protegidos,
+como `id`, `iesId`, `tipo`, `token` e `senha`, são rejeitados na edição do cadastro.
+Campos ausentes ou nulos no PATCH permanecem inalterados; para gênero, envie
+`FEMININO`, `MASCULINO`, `NAO_INFORMAR` ou `OUTRO`. Exemplo de edição:
+
+```json
+{"nome":"Ana Silva","matricula":"2026005678","genero":"NAO_INFORMAR"}
+```
+
+Troca de senha:
+
+```json
+{"senhaAtual":"senha-atual","novaSenha":"nova-senha"}
+```
+
+Exclusão da conta (corpo JSON do DELETE):
+
+```json
+{"senhaAtual":"senha-atual"}
+```
+
+E-mail é normalizado para minúsculas; espaços externos de username, nome,
+matrícula e país são removidos. Senhas são preservadas exatamente como informadas
+e seguem a política existente, sem tamanho mínimo. Senha atual incorreta retorna
+403; falta de autenticação ou token expirado/revogado retorna 401; dados inválidos
+retornam 400 e conflitos de unicidade retornam 409. Trocar username não invalida
+o token atual, mas os próximos logins usam o novo nome. Trocar a senha renova o UUID
+de acesso na mesma transação, exigindo novo login em todos os dispositivos.
+
+As escritas bloqueiam o cadastro durante a transação e identificam o autor antes
+das alterações para os triggers de auditoria. A exclusão usa a entidade com herança
+JOINED para remover também `usuario`. A migração de auditoria deve estar aplicada.
+
+Testes da funcionalidade:
+
+```bash
+mvn compile
+mvn -Dtest=EstudanteServiceTest,EstudanteControllerTest,JwtAuthenticationTest test
+```
+
+Os testes usam mocks para autorização, edição, senha, exclusão e contratos HTTP;
+o bloqueio concorrente, a exclusão JOINED e o rollback real exigem PostgreSQL.
+
+## Autogestão do funcionário
+
+As rotas de `/funcionario` identificam exclusivamente o titular pelo JWT do cookie
+`seed_cookie` e verificam seu tipo no banco. Estudantes recebem 403. Não há ID de
+usuário na rota ou no corpo para selecionar outra conta.
+
+| Método e rota | Comportamento |
+| --- | --- |
+| `GET /funcionario` | Consulta os próprios dados: `id`, `email`, `username`, `nome`, `formacao` e `iesId` |
+| `PATCH /funcionario` | Edição parcial de `nome`, `formacao`, `email` e `username`; IES fixa |
+| `PATCH /funcionario/senha` | Exige `senhaAtual` e `novaSenha`; invalida todos os tokens anteriores e limpa o cookie |
+| `DELETE /funcionario` | Exige `senhaAtual`; remove só a própria conta ou, sendo o último funcionário, a IES e todos os estudantes e suas contas |
+
+As respostas não expõem senha, hash, token ou chave privada da IES e usam
+`Cache-Control: no-store`. Campos ausentes ou nulos no PATCH não são alterados;
+campos desconhecidos ou protegidos, como `id`, `iesId`, `tipo`, `token` e `senha`,
+são rejeitados. E-mail é normalizado para minúsculas e espaços externos dos campos
+editáveis são removidos. Exemplo:
+
+```json
+{"nome":"Ana Silva","formacao":"Psicologia"}
+```
+
+Troca de senha e exclusão usam os mesmos formatos JSON da rota de estudante e
+retornam 204. Senha atual incorreta retorna 403, autenticação inválida retorna 401,
+corpo inválido retorna 400 e conflitos de unicidade ou dependências retornam 409.
+Senhas seguem a política existente, sem tamanho mínimo e sem remoção de espaços.
+
+Ao excluir a conta, a aplicação bloqueia primeiro a IES, depois revalida e bloqueia
+o funcionário, confere a senha e conta os funcionários ainda vinculados. Cadastros
+e exclusões institucionais usam o mesmo bloqueio da IES. Com outros funcionários,
+a instituição e seus estudantes são preservados; com apenas o solicitante, todos
+os estudantes, suas contas, o funcionário e sua conta e a IES são removidos na mesma
+transação. Uma falha desfaz toda a exclusão. O histórico de auditoria permanece com
+o solicitante como autor, e tokens de contas removidas deixam de autenticar.
+
+```bash
+mvn compile
+mvn -Dtest=FuncionarioServiceTest,FuncionarioControllerTest,IesServiceTest,JwtAuthenticationTest test
+```
+
+Os testes usam mocks e cobrem autorização, campos protegidos, senha, os dois casos
+de exclusão e a ordem dos bloqueios. Concorrência, rollback e exclusão JOINED no
+banco precisam ser verificados com PostgreSQL.
+
 ## Login por username
 
 `POST /auth/login` recebe exclusivamente o nome de usuário e a senha:
