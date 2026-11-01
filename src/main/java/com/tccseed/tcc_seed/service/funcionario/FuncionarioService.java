@@ -1,14 +1,17 @@
 package com.tccseed.tcc_seed.service.funcionario;
 
-import com.tccseed.tcc_seed.controller.funcionario.dto.*;
+import com.tccseed.tcc_seed.controller.funcionario.dto.ContaExclusaoRequest;
+import com.tccseed.tcc_seed.controller.funcionario.dto.FuncionarioAtualizacaoRequest;
+import com.tccseed.tcc_seed.controller.funcionario.dto.FuncionarioResponse;
+import com.tccseed.tcc_seed.controller.funcionario.dto.SenhaAtualizacaoRequest;
 import com.tccseed.tcc_seed.domain.entity.Funcionario;
 import com.tccseed.tcc_seed.domain.entity.Usuario;
 import com.tccseed.tcc_seed.domain.enums.TipoUsuario;
 import com.tccseed.tcc_seed.repository.FuncionarioRepository;
-import com.tccseed.tcc_seed.repository.UsuarioRepository;
 import com.tccseed.tcc_seed.repository.IesRepository;
-import com.tccseed.tcc_seed.service.ies.IesService;
+import com.tccseed.tcc_seed.repository.UsuarioRepository;
 import com.tccseed.tcc_seed.service.auditoria.AuditoriaService;
+import com.tccseed.tcc_seed.service.ies.IesService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;

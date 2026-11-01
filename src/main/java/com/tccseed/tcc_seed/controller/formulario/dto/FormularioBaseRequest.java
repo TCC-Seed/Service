@@ -2,13 +2,15 @@ package com.tccseed.tcc_seed.controller.formulario.dto;
 
 import com.tccseed.tcc_seed.domain.entity.Estudante;
 import com.tccseed.tcc_seed.domain.entity.FormularioBase;
+
 import java.time.LocalDate;
 
 public record FormularioBaseRequest(Long idEstudante, LocalDate dataPreenchimento, String anotacao,
-        boolean secaoAutoconhecimento, boolean secaoHidratacao, boolean secaoExercicios,
-        boolean secaoAlimentacao, boolean secaoAcademia, boolean secaoMental, boolean secaoTrabalho,
-        boolean secaoSocial, boolean secaoSono, boolean secaoLazer, boolean secaoCultura,
-        boolean secaoFinanceiro, boolean secaoAmoroso, boolean secaoAcess) {
+                                    boolean secaoAutoconhecimento, boolean secaoHidratacao, boolean secaoExercicios,
+                                    boolean secaoAlimentacao, boolean secaoAcademia, boolean secaoMental,
+                                    boolean secaoTrabalho,
+                                    boolean secaoSocial, boolean secaoSono, boolean secaoLazer, boolean secaoCultura,
+                                    boolean secaoFinanceiro, boolean secaoAmoroso, boolean secaoAcess) {
     public FormularioBase toEntity() {
         FormularioBase entidade = new FormularioBase();
         Estudante estudante = new Estudante();

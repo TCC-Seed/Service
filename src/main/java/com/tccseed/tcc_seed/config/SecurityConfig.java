@@ -1,8 +1,13 @@
 package com.tccseed.tcc_seed.config;
 
-import org.springframework.http.HttpMethod;
+import com.tccseed.tcc_seed.repository.UsuarioRepository;
+import com.tccseed.tcc_seed.security.JwtAuthenticationFilter;
+import com.tccseed.tcc_seed.security.JwtService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.argon2.Argon2PasswordEncoder;
@@ -13,14 +18,8 @@ import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
 import org.springframework.security.web.csrf.CsrfTokenRequestHandler;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 
 import java.util.function.Supplier;
-
-import com.tccseed.tcc_seed.security.JwtAuthenticationFilter;
-import com.tccseed.tcc_seed.security.JwtService;
-import com.tccseed.tcc_seed.repository.UsuarioRepository;
 
 @Configuration
 public class SecurityConfig {
@@ -48,7 +47,8 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf
                         .csrfTokenRepository(csrfTokenRepository)
-                        .csrfTokenRequestHandler(csrfTokenRequestHandler))
+                        .csrfTokenRequestHandler(csrfTokenRequestHandler)
+                        .ignoringRequestMatchers("/auth/**"))
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth

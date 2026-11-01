@@ -1,6 +1,9 @@
 package com.tccseed.tcc_seed.service.estudante;
 
-import com.tccseed.tcc_seed.controller.estudante.dto.*;
+import com.tccseed.tcc_seed.controller.estudante.dto.ContaExclusaoRequest;
+import com.tccseed.tcc_seed.controller.estudante.dto.EstudanteAtualizacaoRequest;
+import com.tccseed.tcc_seed.controller.estudante.dto.EstudanteResponse;
+import com.tccseed.tcc_seed.controller.estudante.dto.SenhaAtualizacaoRequest;
 import com.tccseed.tcc_seed.domain.entity.Estudante;
 import com.tccseed.tcc_seed.domain.entity.Usuario;
 import com.tccseed.tcc_seed.domain.enums.TipoUsuario;

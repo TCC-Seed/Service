@@ -1,12 +1,13 @@
 package com.tccseed.tcc_seed.controller.publicacao;
 
-import com.tccseed.tcc_seed.domain.entity.Publicacao;
 import com.tccseed.tcc_seed.controller.publicacao.dto.PublicacaoRequest;
+import com.tccseed.tcc_seed.domain.entity.Publicacao;
 import com.tccseed.tcc_seed.service.publicacao.PublicacaoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
 
 @RestController

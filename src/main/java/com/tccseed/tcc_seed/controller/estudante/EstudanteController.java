@@ -1,6 +1,9 @@
 package com.tccseed.tcc_seed.controller.estudante;
 
-import com.tccseed.tcc_seed.controller.estudante.dto.*;
+import com.tccseed.tcc_seed.controller.estudante.dto.ContaExclusaoRequest;
+import com.tccseed.tcc_seed.controller.estudante.dto.EstudanteAtualizacaoRequest;
+import com.tccseed.tcc_seed.controller.estudante.dto.EstudanteResponse;
+import com.tccseed.tcc_seed.controller.estudante.dto.SenhaAtualizacaoRequest;
 import com.tccseed.tcc_seed.security.JwtAuthenticationFilter;
 import com.tccseed.tcc_seed.service.estudante.EstudanteService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -29,14 +32,14 @@ public class EstudanteController {
     @PatchMapping
     @Operation(summary = "Editar os próprios dados", description = "Edição parcial, inclusive matrícula. IES é fixa. Campos ausentes ou nulos não são alterados.")
     public ResponseEntity<EstudanteResponse> atualizar(Principal principal,
-            @Valid @RequestBody EstudanteAtualizacaoRequest request) {
+                                                       @Valid @RequestBody EstudanteAtualizacaoRequest request) {
         return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(service.atualizar(principal.getName(), request));
     }
 
     @PatchMapping("/senha")
     @Operation(summary = "Trocar a própria senha", description = "Exige a senha atual. Invalida todos os tokens anteriores e exige novo login.")
     public ResponseEntity<Void> alterarSenha(Principal principal,
-            @Valid @RequestBody SenhaAtualizacaoRequest request) {
+                                             @Valid @RequestBody SenhaAtualizacaoRequest request) {
         service.alterarSenha(principal.getName(), request);
         return encerrarSessao();
     }
@@ -44,7 +47,7 @@ public class EstudanteController {
     @DeleteMapping
     @Operation(summary = "Excluir a própria conta", description = "Exige a senha atual. Exclusão definitiva do estudante e usuário, preservando IES e auditoria.")
     public ResponseEntity<Void> excluir(Principal principal,
-            @Valid @RequestBody ContaExclusaoRequest request) {
+                                        @Valid @RequestBody ContaExclusaoRequest request) {
         service.excluir(principal.getName(), request);
         return encerrarSessao();
     }

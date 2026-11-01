@@ -2,6 +2,7 @@ package com.tccseed.tcc_seed.controller.publicacao.dto;
 
 import com.tccseed.tcc_seed.domain.entity.Funcionario;
 import com.tccseed.tcc_seed.domain.entity.Publicacao;
+
 import java.time.LocalDate;
 
 public record PublicacaoRequest(Long idFuncionario, String titulo, String descricao, LocalDate dataPublicacao) {

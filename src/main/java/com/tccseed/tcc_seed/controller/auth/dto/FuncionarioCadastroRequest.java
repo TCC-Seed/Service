@@ -3,12 +3,7 @@ package com.tccseed.tcc_seed.controller.auth.dto;
 import com.tccseed.tcc_seed.controller.ies.dto.IesRequest;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.AssertTrue;
-import jakarta.validation.constraints.Positive;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 
 public record FuncionarioCadastroRequest(
         @Schema(description = "Obrigatório. E-mail único do cadastro, em formato válido, com até 254 caracteres. Não é usado para login.",

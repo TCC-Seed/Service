@@ -28,6 +28,8 @@
 	</scm>
 	<properties>
 		<java.version>21</java.version>
+		<checkstyle.version>14.4.0</checkstyle.version>
+		<pmd.version>7.28.0</pmd.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -160,6 +162,88 @@
 						</configuration>
 					</execution>
 				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-checkstyle-plugin</artifactId>
+				<version>3.6.0</version>
+				<dependencies>
+					<dependency>
+						<groupId>com.puppycrawl.tools</groupId>
+						<artifactId>checkstyle</artifactId>
+						<version>${checkstyle.version}</version>
+					</dependency>
+				</dependencies>
+				<configuration>
+					<configLocation>config/checkstyle/checkstyle.xml</configLocation>
+					<consoleOutput>true</consoleOutput>
+					<includeTestSourceDirectory>false</includeTestSourceDirectory>
+					<excludeGeneratedSources>true</excludeGeneratedSources>
+					<excludes>**/generated/**</excludes>
+					<failOnViolation>false</failOnViolation>
+					<failsOnError>false</failsOnError>
+					<violationSeverity>error</violationSeverity>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-pmd-plugin</artifactId>
+				<version>3.28.0</version>
+				<dependencies>
+					<dependency>
+						<groupId>net.sourceforge.pmd</groupId>
+						<artifactId>pmd-core</artifactId>
+						<version>${pmd.version}</version>
+					</dependency>
+					<dependency>
+						<groupId>net.sourceforge.pmd</groupId>
+						<artifactId>pmd-java</artifactId>
+						<version>${pmd.version}</version>
+					</dependency>
+				</dependencies>
+				<configuration>
+					<targetJdk>21</targetJdk>
+					<rulesets>
+						<ruleset>config/pmd/ruleset.xml</ruleset>
+					</rulesets>
+					<includeTests>false</includeTests>
+					<excludeRoots>
+						<excludeRoot>${project.build.directory}/generated-sources</excludeRoot>
+					</excludeRoots>
+					<failOnViolation>false</failOnViolation>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>com.github.spotbugs</groupId>
+				<artifactId>spotbugs-maven-plugin</artifactId>
+				<version>4.10.5.0</version>
+				<configuration>
+					<effort>Max</effort>
+					<threshold>Medium</threshold>
+					<includeTests>false</includeTests>
+					<excludeFilterFile>${project.basedir}/config/spotbugs/exclude.xml</excludeFilterFile>
+					<maxAllowedViolations>2147483647</maxAllowedViolations>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>com.diffplug.spotless</groupId>
+				<artifactId>spotless-maven-plugin</artifactId>
+				<version>3.10.4</version>
+				<configuration>
+					<java>
+						<includes>
+							<include>src/main/java/**/*.java</include>
+						</includes>
+						<excludes>
+							<exclude>**/generated/**</exclude>
+						</excludes>
+						<googleJavaFormat>
+							<version>1.37.0</version>
+							<style>GOOGLE</style>
+						</googleJavaFormat>
+						<removeUnusedImports />
+					</java>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>

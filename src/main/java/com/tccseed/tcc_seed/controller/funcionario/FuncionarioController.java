@@ -1,6 +1,9 @@
 package com.tccseed.tcc_seed.controller.funcionario;
 
-import com.tccseed.tcc_seed.controller.funcionario.dto.*;
+import com.tccseed.tcc_seed.controller.funcionario.dto.ContaExclusaoRequest;
+import com.tccseed.tcc_seed.controller.funcionario.dto.FuncionarioAtualizacaoRequest;
+import com.tccseed.tcc_seed.controller.funcionario.dto.FuncionarioResponse;
+import com.tccseed.tcc_seed.controller.funcionario.dto.SenhaAtualizacaoRequest;
 import com.tccseed.tcc_seed.security.JwtAuthenticationFilter;
 import com.tccseed.tcc_seed.service.funcionario.FuncionarioService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -29,14 +32,14 @@ public class FuncionarioController {
     @PatchMapping
     @Operation(summary = "Editar os próprios dados", description = "Edição parcial de nome, formação, e-mail e username. IES é fixa. Campos ausentes ou nulos não são alterados.")
     public ResponseEntity<FuncionarioResponse> atualizar(Principal principal,
-            @Valid @RequestBody FuncionarioAtualizacaoRequest request) {
+                                                         @Valid @RequestBody FuncionarioAtualizacaoRequest request) {
         return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(service.atualizar(principal.getName(), request));
     }
 
     @PatchMapping("/senha")
     @Operation(summary = "Trocar a própria senha", description = "Exige a senha atual. Invalida todos os tokens anteriores e exige novo login.")
     public ResponseEntity<Void> alterarSenha(Principal principal,
-            @Valid @RequestBody SenhaAtualizacaoRequest request) {
+                                             @Valid @RequestBody SenhaAtualizacaoRequest request) {
         service.alterarSenha(principal.getName(), request);
         return encerrarSessao();
     }
@@ -44,7 +47,7 @@ public class FuncionarioController {
     @DeleteMapping
     @Operation(summary = "Excluir a própria conta", description = "Exige a senha atual. Exclui a própria conta. Se for o último funcionário, exclui também a IES e todos os estudantes e suas contas. Preserva a auditoria.")
     public ResponseEntity<Void> excluir(Principal principal,
-            @Valid @RequestBody ContaExclusaoRequest request) {
+                                        @Valid @RequestBody ContaExclusaoRequest request) {
         service.excluir(principal.getName(), request);
         return encerrarSessao();
     }
