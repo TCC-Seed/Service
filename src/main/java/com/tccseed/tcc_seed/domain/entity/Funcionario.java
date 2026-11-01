@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "funcionario", indexes = @Index(name = "idx_funcionario_ies", columnList = "ies_id"))
+@Table(name = "funcionario", indexes = @Index(name = "idx_funcionario_id_ies", columnList = "id_ies"))
 @PrimaryKeyJoinColumn(name = "id")
 @Getter
 @Setter
@@ -30,7 +30,7 @@ public class Funcionario extends Usuario {
     private String formacao;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "ies_id", nullable = false, updatable = false,
+    @JoinColumn(name = "id_ies", nullable = false, updatable = false,
             foreignKey = @ForeignKey(name = "fk_funcionario_ies"))
     @EqualsAndHashCode.Exclude
     private Ies ies;

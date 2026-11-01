@@ -22,6 +22,7 @@ CREATE TABLE IES
 (
     id                    SMALLSERIAL  NOT NULL,
     nome                  VARCHAR(200) NOT NULL,
+    chave_vinculo         VARCHAR(43)  NOT NULL,
     regiao_administrativa VARCHAR(100),
     CONSTRAINT pk_ies PRIMARY KEY (id)
 );
@@ -196,6 +197,34 @@ CREATE TABLE CATEGORIA_PUBLICACAO
     CONSTRAINT fk_categoria_publicacao_publicacao FOREIGN KEY (id_publicacao)
         REFERENCES PUBLICACAO (id) ON DELETE CASCADE
 );
+
+CREATE SCHEMA auditoria;
+REVOKE ALL ON SCHEMA auditoria FROM PUBLIC;
+
+CREATE TABLE auditoria.registro
+(
+    id                 BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    ocorrido_em        TIMESTAMPTZ NOT NULL DEFAULT clock_timestamp(),
+    transacao_id       BIGINT      NOT NULL DEFAULT txid_current(),
+    schema_tabela      TEXT        NOT NULL,
+    tabela             TEXT        NOT NULL,
+    registro_id        JSONB       NOT NULL,
+    operacao           TEXT        NOT NULL CHECK (operacao IN ('INSERT', 'UPDATE', 'DELETE')),
+    origem             TEXT        NOT NULL CHECK (origem IN ('usuario', 'cadastro_publico', 'banco')),
+    usuario_id         BIGINT,
+    username           TEXT,
+    conta_banco        TEXT        NOT NULL,
+    valores_anteriores JSONB,
+    valores_novos      JSONB,
+    CHECK ((origem = 'usuario' AND usuario_id IS NOT NULL AND username IS NOT NULL)
+        OR (origem <> 'usuario' AND usuario_id IS NULL AND username IS NULL))
+);
+
+CREATE INDEX registro_tabela_id_idx ON auditoria.registro (schema_tabela, tabela, (registro_id ->> 'id'), id);
+CREATE INDEX registro_usuario_data_idx ON auditoria.registro (usuario_id, ocorrido_em);
+CREATE INDEX registro_data_idx ON auditoria.registro (ocorrido_em);
+REVOKE ALL ON ALL TABLES IN SCHEMA auditoria FROM PUBLIC;
+REVOKE ALL ON ALL SEQUENCES IN SCHEMA auditoria FROM PUBLIC;
 
 
 -----------------------------------------------------------

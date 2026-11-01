@@ -19,7 +19,7 @@ import org.hibernate.annotations.ColumnTransformer;
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "estudante", indexes = @Index(name = "idx_estudante_ies", columnList = "ies_id"))
+@Table(name = "estudante", indexes = @Index(name = "idx_estudante_id_ies", columnList = "id_ies"))
 @PrimaryKeyJoinColumn(name = "id")
 @Getter
 @Setter
@@ -44,7 +44,7 @@ public class Estudante extends Usuario {
     private String paisOrigem;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "ies_id", nullable = false, updatable = false,
+    @JoinColumn(name = "id_ies", nullable = false, updatable = false,
             foreignKey = @ForeignKey(name = "fk_estudante_ies"))
     @EqualsAndHashCode.Exclude
     private Ies ies;
