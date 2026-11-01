@@ -1,6 +1,7 @@
 package com.tccseed.tcc_seed.controller.evento;
 
 import com.tccseed.tcc_seed.domain.entity.CategoriaEvento;
+import com.tccseed.tcc_seed.controller.evento.dto.CategoriaEventoRequest;
 import com.tccseed.tcc_seed.domain.entity.id.CategoriaEventoId;
 import com.tccseed.tcc_seed.service.evento.CategoriaEventoService;
 import lombok.RequiredArgsConstructor;
@@ -16,8 +17,8 @@ public class CategoriaEventoController {
     private final CategoriaEventoService service;
 
     @PostMapping
-    public ResponseEntity<CategoriaEvento> criar(@RequestBody CategoriaEvento entidade) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(service.criar(entidade));
+    public ResponseEntity<CategoriaEvento> criar(@RequestBody CategoriaEventoRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.criar(request.toEntity()));
     }
 
     @GetMapping
@@ -31,8 +32,8 @@ public class CategoriaEventoController {
     }
 
     @PutMapping("/{idEvento}/{categoria}")
-    public CategoriaEvento atualizar(@PathVariable Long idEvento, @PathVariable String categoria, @RequestBody CategoriaEvento entidade) {
-        return service.atualizar(id(idEvento, categoria), entidade);
+    public CategoriaEvento atualizar(@PathVariable Long idEvento, @PathVariable String categoria, @RequestBody CategoriaEventoRequest request) {
+        return service.atualizar(id(idEvento, categoria), request.toEntity());
     }
 
     @DeleteMapping("/{idEvento}/{categoria}")

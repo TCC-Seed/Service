@@ -1,6 +1,7 @@
 package com.tccseed.tcc_seed.controller.evento;
 
 import com.tccseed.tcc_seed.domain.entity.Evento;
+import com.tccseed.tcc_seed.controller.evento.dto.EventoRequest;
 import com.tccseed.tcc_seed.service.evento.EventoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -15,8 +16,8 @@ public class EventoController {
     private final EventoService service;
 
     @PostMapping
-    public ResponseEntity<Evento> criar(@RequestBody Evento entidade) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(service.criar(entidade));
+    public ResponseEntity<Evento> criar(@RequestBody EventoRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.criar(request.toEntity()));
     }
 
     @GetMapping
@@ -30,8 +31,8 @@ public class EventoController {
     }
 
     @PutMapping("/{id}")
-    public Evento atualizar(@PathVariable Long id, @RequestBody Evento entidade) {
-        return service.atualizar(id, entidade);
+    public Evento atualizar(@PathVariable Long id, @RequestBody EventoRequest request) {
+        return service.atualizar(id, request.toEntity());
     }
 
     @DeleteMapping("/{id}")

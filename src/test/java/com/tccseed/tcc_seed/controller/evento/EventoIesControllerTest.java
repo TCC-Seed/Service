@@ -1,5 +1,6 @@
 package com.tccseed.tcc_seed.controller.evento;
 
+import com.tccseed.tcc_seed.controller.evento.dto.EventoIesRequest;
 import com.tccseed.tcc_seed.domain.entity.EventoIes;
 import com.tccseed.tcc_seed.domain.entity.id.EventoIesId;
 import com.tccseed.tcc_seed.service.evento.EventoIesService;
@@ -23,6 +24,10 @@ class EventoIesControllerTest {
     private final EventoIes entidade = new EventoIes();
     private final EventoIesId expectedId = new EventoIesId();
 
+    private EventoIesRequest request() {
+        return new EventoIesRequest(null, null);
+    }
+
     @BeforeEach
     void preparar() {
         controller = new EventoIesController(service);
@@ -32,11 +37,11 @@ class EventoIesControllerTest {
 
     @Test
     void criarDelegaAoServiceERetorna201() {
-        when(service.criar(entidade)).thenReturn(entidade);
-        ResponseEntity<EventoIes> response = controller.criar(entidade);
+        when(service.criar(any(EventoIes.class))).thenReturn(entidade);
+        ResponseEntity<EventoIes> response = controller.criar(request());
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
         assertSame(entidade, response.getBody());
-        verify(service).criar(entidade);
+        verify(service).criar(any(EventoIes.class));
     }
 
     @Test
@@ -55,9 +60,9 @@ class EventoIesControllerTest {
 
     @Test
     void atualizarDelegaAoService() {
-        when(service.atualizar(expectedId, entidade)).thenReturn(entidade);
-        assertSame(entidade, controller.atualizar(10L, 10L, entidade));
-        verify(service).atualizar(expectedId, entidade);
+        when(service.atualizar(eq(expectedId), any(EventoIes.class))).thenReturn(entidade);
+        assertSame(entidade, controller.atualizar(10L, 10L, request()));
+        verify(service).atualizar(eq(expectedId), any(EventoIes.class));
     }
 
     @Test

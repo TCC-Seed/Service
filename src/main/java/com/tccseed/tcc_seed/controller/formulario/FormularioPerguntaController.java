@@ -1,6 +1,7 @@
 package com.tccseed.tcc_seed.controller.formulario;
 
 import com.tccseed.tcc_seed.domain.entity.FormularioPergunta;
+import com.tccseed.tcc_seed.controller.formulario.dto.FormularioPerguntaRequest;
 import com.tccseed.tcc_seed.domain.entity.id.FormularioPerguntaId;
 import com.tccseed.tcc_seed.service.formulario.FormularioPerguntaService;
 import lombok.RequiredArgsConstructor;
@@ -16,8 +17,8 @@ public class FormularioPerguntaController {
     private final FormularioPerguntaService service;
 
     @PostMapping
-    public ResponseEntity<FormularioPergunta> criar(@RequestBody FormularioPergunta entidade) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(service.criar(entidade));
+    public ResponseEntity<FormularioPergunta> criar(@RequestBody FormularioPerguntaRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.criar(request.toEntity()));
     }
 
     @GetMapping
@@ -31,8 +32,8 @@ public class FormularioPerguntaController {
     }
 
     @PutMapping("/{idFormularioPersonalizado}/{idPergunta}")
-    public FormularioPergunta atualizar(@PathVariable Long idFormularioPersonalizado, @PathVariable Long idPergunta, @RequestBody FormularioPergunta entidade) {
-        return service.atualizar(id(idFormularioPersonalizado, idPergunta), entidade);
+    public FormularioPergunta atualizar(@PathVariable Long idFormularioPersonalizado, @PathVariable Long idPergunta, @RequestBody FormularioPerguntaRequest request) {
+        return service.atualizar(id(idFormularioPersonalizado, idPergunta), request.toEntity());
     }
 
     @DeleteMapping("/{idFormularioPersonalizado}/{idPergunta}")
