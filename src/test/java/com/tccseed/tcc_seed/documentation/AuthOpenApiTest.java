@@ -49,21 +49,19 @@ class AuthOpenApiTest {
     @Autowired JsonMapper mapper;
 
     @Test
-    void csrfCookiePermiteObterTokenERejeitaPostSemToken() throws Exception {
-        var csrfResponse = mvc.perform(get("/auth/csrf"))
+    void csrfCookieSaiEmGetExistenteEProtegePost() throws Exception {
+        var csrfResponse = mvc.perform(get("/v3/api-docs"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.headerName").value("X-XSRF-TOKEN"))
                 .andReturn().getResponse();
         var csrfCookie = csrfResponse.getCookie("XSRF-TOKEN");
         assertNotNull(csrfCookie);
-        JsonNode csrfBody = mapper.readTree(csrfResponse.getContentAsString());
-        String token = csrfBody.path("token").asText();
+        String token = csrfCookie.getValue();
         assertFalse(token.isBlank());
 
         mvc.perform(post("/auth/cadastro/estudante").contentType("application/json").content("{}"))
                 .andExpect(status().isForbidden());
         mvc.perform(post("/auth/cadastro/estudante").cookie(csrfCookie)
-                        .header(csrfBody.path("headerName").asText(), token)
+                        .header("X-XSRF-TOKEN", token)
                         .contentType("application/json").content("{}"))
                 .andExpect(status().isBadRequest());
     }

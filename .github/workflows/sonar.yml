@@ -13,6 +13,25 @@ jobs:
   analyze:
     runs-on: ubuntu-latest
     environment: SONAR_ORGANIZATION
+    env:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/tcc_seed_ci
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      JWT_SECRET: ci-only-test-jwt-secret-long-enough-for-the-minimum-length
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_DB: tcc_seed_ci
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d tcc_seed_ci"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     # Secrets are unavailable to pull requests from forks. Keep their build
     # running, but only send analyses when this repository can authenticate.
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository

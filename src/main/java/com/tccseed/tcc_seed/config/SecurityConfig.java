@@ -10,6 +10,13 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import org.springframework.security.web.csrf.CsrfToken;
+import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
+import org.springframework.security.web.csrf.CsrfTokenRequestHandler;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
+import java.util.function.Supplier;
 
 import com.tccseed.tcc_seed.security.JwtAuthenticationFilter;
 import com.tccseed.tcc_seed.security.JwtService;
@@ -29,10 +36,19 @@ public class SecurityConfig {
                                                    UsuarioRepository usuarioRepository) throws Exception {
         CookieCsrfTokenRepository csrfTokenRepository = new CookieCsrfTokenRepository();
         csrfTokenRepository.setCookieCustomizer(cookie -> cookie.secure(true).sameSite("Lax").path("/"));
+        CsrfTokenRequestHandler csrfTokenRequestHandler = new CsrfTokenRequestAttributeHandler() {
+            @Override
+            public void handle(HttpServletRequest request, HttpServletResponse response,
+                               Supplier<CsrfToken> deferredCsrfToken) {
+                super.handle(request, response, deferredCsrfToken);
+                deferredCsrfToken.get();
+            }
+        };
 
         http
                 .csrf(csrf -> csrf
-                        .csrfTokenRepository(csrfTokenRepository))
+                        .csrfTokenRepository(csrfTokenRepository)
+                        .csrfTokenRequestHandler(csrfTokenRequestHandler))
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
