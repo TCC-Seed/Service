@@ -1,7 +1,23 @@
 package com.tccseed.tcc_seed.service.evento;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import com.tccseed.tcc_seed.controller.evento.dto.EventoAtualizacaoRequest;
+import com.tccseed.tcc_seed.controller.evento.dto.EventoCriacaoRequest;
 import com.tccseed.tcc_seed.domain.entity.Evento;
+import com.tccseed.tcc_seed.domain.entity.Ies;
+import com.tccseed.tcc_seed.repository.EstudanteRepository;
 import com.tccseed.tcc_seed.repository.EventoRepository;
+import com.tccseed.tcc_seed.repository.FuncionarioRepository;
+import com.tccseed.tcc_seed.repository.IesRepository;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -10,80 +26,72 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.List;
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
-
 @ExtendWith(MockitoExtension.class)
 class EventoServiceTest {
-    @Mock private EventoRepository repository;
-    private EventoService service;
-    private final Evento entidade = new Evento();
-    private final Long id = 1L;
+  private static final UUID TOKEN = UUID.randomUUID();
 
-    @BeforeEach
-    void preparar() {
-        service = new EventoService(repository);
-    }
+  @Mock private EventoRepository eventoRepository;
+  @Mock private FuncionarioRepository funcionarioRepository;
+  @Mock private EstudanteRepository estudanteRepository;
+  @Mock private IesRepository iesRepository;
+  private EventoService service;
 
-    @Test
-    void criarPersisteEntidade() {
-        when(repository.save(entidade)).thenReturn(entidade);
-        assertSame(entidade, service.criar(entidade));
-        verify(repository).save(entidade);
-    }
+  @BeforeEach
+  void preparar() {
+    service =
+        new EventoService(
+            eventoRepository, funcionarioRepository, estudanteRepository, iesRepository);
+  }
 
-    @Test
-    void listarRetornaTodosOsRegistros() {
-        when(repository.findAll()).thenReturn(List.of(entidade));
-        assertEquals(List.of(entidade), service.listar());
-        verify(repository).findAll();
-    }
+  @Test
+  void estudanteNaoPodeCriarEvento() {
+    EventoCriacaoRequest request =
+        new EventoCriacaoRequest(LocalDate.now(), null, null, "Descrição", List.of());
 
-    @Test
-    void buscarPorIdRetornaRegistroExistente() {
-        when(repository.findById(id)).thenReturn(Optional.of(entidade));
-        assertSame(entidade, service.buscarPorId(id));
-    }
+    ResponseStatusException erro =
+        assertThrows(
+            ResponseStatusException.class,
+            () -> service.criar(request, TOKEN, "ROLE_ESTUDANTE"));
 
-    @Test
-    void buscarPorIdInexistenteRetorna404() {
-        when(repository.findById(id)).thenReturn(Optional.empty());
-        ResponseStatusException erro = assertThrows(ResponseStatusException.class, () -> service.buscarPorId(id));
-        assertEquals(HttpStatus.NOT_FOUND, erro.getStatusCode());
-    }
+    assertEquals(HttpStatus.FORBIDDEN, erro.getStatusCode());
+    verify(funcionarioRepository, never()).findIesIdByToken(TOKEN);
+    verify(eventoRepository, never()).save(org.mockito.ArgumentMatchers.any());
+  }
 
-    @Test
-    void atualizarRegistroExistentePersisteComIdDaRota() {
-        when(repository.existsById(id)).thenReturn(true);
-        when(repository.save(entidade)).thenReturn(entidade);
-        assertSame(entidade, service.atualizar(id, entidade));
-        assertEquals(id, entidade.getId());
-        verify(repository).save(entidade);
-    }
+  @Test
+  void listarFiltraPelaIesDoUsuario() {
+    when(funcionarioRepository.findIesIdByToken(TOKEN)).thenReturn(Optional.of(7L));
+    when(eventoRepository.findVisiveisPorIesECategoria(7L, "Tecnologia"))
+        .thenReturn(List.of());
 
-    @Test
-    void atualizarRegistroInexistenteRetorna404SemSalvar() {
-        when(repository.existsById(id)).thenReturn(false);
-        ResponseStatusException erro = assertThrows(ResponseStatusException.class, () -> service.atualizar(id, entidade));
-        assertEquals(HttpStatus.NOT_FOUND, erro.getStatusCode());
-        verify(repository, never()).save(any());
-    }
+    assertEquals(List.of(), service.listar(TOKEN, "Tecnologia"));
 
-    @Test
-    void excluirRegistroExistente() {
-        when(repository.existsById(id)).thenReturn(true);
-        service.excluir(id);
-        verify(repository).deleteById(id);
-    }
+    verify(eventoRepository).findVisiveisPorIesECategoria(7L, "Tecnologia");
+  }
 
-    @Test
-    void excluirRegistroInexistenteRetorna404SemExcluir() {
-        when(repository.existsById(id)).thenReturn(false);
-        ResponseStatusException erro = assertThrows(ResponseStatusException.class, () -> service.excluir(id));
-        assertEquals(HttpStatus.NOT_FOUND, erro.getStatusCode());
-        verify(repository, never()).deleteById(any());
-    }
+  @Test
+  void funcionarioDeOutraIesNaoPodeEditarEvento() {
+    when(funcionarioRepository.findIesIdByToken(TOKEN)).thenReturn(Optional.of(8L));
+    Evento evento = new Evento();
+    evento.setIes(java.util.Set.of(ies(7L)));
+    when(eventoRepository.findComCategoriasEInstituicoesPorId(1L))
+        .thenReturn(Optional.of(evento));
+    EventoAtualizacaoRequest request =
+        new EventoAtualizacaoRequest(
+            LocalDate.now(), null, null, "Descrição", List.of(), List.of(8L));
+
+    ResponseStatusException erro =
+        assertThrows(
+            ResponseStatusException.class,
+            () -> service.atualizar(1L, request, TOKEN, "ROLE_FUNCIONARIO"));
+
+    assertEquals(HttpStatus.FORBIDDEN, erro.getStatusCode());
+    verify(eventoRepository, never()).save(org.mockito.ArgumentMatchers.any());
+  }
+
+  private Ies ies(Long id) {
+    Ies ies = new Ies();
+    ies.setId(id);
+    return ies;
+  }
 }
