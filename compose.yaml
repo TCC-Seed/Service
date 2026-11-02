@@ -36,6 +36,7 @@ services:
     volumes:
       - ./src:/app/src
       - ./pom.xml:/app/pom.xml
+      - ./config:/app/config:ro
       - maven-repo:/root/.m2
     depends_on:
       postgres:

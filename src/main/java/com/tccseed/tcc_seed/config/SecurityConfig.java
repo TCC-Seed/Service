@@ -1,8 +1,14 @@
 package com.tccseed.tcc_seed.config;
 
-import org.springframework.http.HttpMethod;
+import com.tccseed.tcc_seed.repository.UsuarioRepository;
+import com.tccseed.tcc_seed.security.JwtAuthenticationFilter;
+import com.tccseed.tcc_seed.security.JwtService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import java.util.function.Supplier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.argon2.Argon2PasswordEncoder;
@@ -13,54 +19,58 @@ import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
 import org.springframework.security.web.csrf.CsrfTokenRequestHandler;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-
-import java.util.function.Supplier;
-
-import com.tccseed.tcc_seed.security.JwtAuthenticationFilter;
-import com.tccseed.tcc_seed.security.JwtService;
-import com.tccseed.tcc_seed.repository.UsuarioRepository;
 
 @Configuration
 public class SecurityConfig {
 
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return Argon2PasswordEncoder.defaultsForSpringSecurity_v5_8();
-    }
+  @Bean
+  public PasswordEncoder passwordEncoder() {
+    return Argon2PasswordEncoder.defaultsForSpringSecurity_v5_8();
+  }
 
-    @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http,
-                                                   JwtService jwtService,
-                                                   UsuarioRepository usuarioRepository) throws Exception {
-        CookieCsrfTokenRepository csrfTokenRepository = new CookieCsrfTokenRepository();
-        csrfTokenRepository.setCookieCustomizer(cookie -> cookie.secure(true).sameSite("Lax").path("/"));
-        CsrfTokenRequestHandler csrfTokenRequestHandler = new CsrfTokenRequestAttributeHandler() {
-            @Override
-            public void handle(HttpServletRequest request, HttpServletResponse response,
-                               Supplier<CsrfToken> deferredCsrfToken) {
-                super.handle(request, response, deferredCsrfToken);
-                deferredCsrfToken.get();
-            }
+  @Bean
+  public SecurityFilterChain securityFilterChain(
+      HttpSecurity http, JwtService jwtService, UsuarioRepository usuarioRepository)
+      throws Exception {
+    CookieCsrfTokenRepository csrfTokenRepository = new CookieCsrfTokenRepository();
+    csrfTokenRepository.setCookieCustomizer(
+        cookie -> cookie.secure(true).sameSite("Lax").path("/"));
+    CsrfTokenRequestHandler csrfTokenRequestHandler =
+        new CsrfTokenRequestAttributeHandler() {
+          @Override
+          public void handle(
+              HttpServletRequest request,
+              HttpServletResponse response,
+              Supplier<CsrfToken> deferredCsrfToken) {
+            super.handle(request, response, deferredCsrfToken);
+            deferredCsrfToken.get();
+          }
         };
 
-        http
-                .csrf(csrf -> csrf
-                        .csrfTokenRepository(csrfTokenRepository)
-                        .csrfTokenRequestHandler(csrfTokenRequestHandler))
-                .sessionManagement(session ->
-                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/swagger-ui/**", "/api-docs/**", "/v3/api-docs/**").permitAll()
-                        .requestMatchers("/auth/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/IES").permitAll()
-                        .anyRequest().authenticated()
-                )
-                .exceptionHandling(exceptions -> exceptions
-                        .authenticationEntryPoint((request, response, exception) -> response.sendError(401))
-                )
-                .addFilterBefore(new JwtAuthenticationFilter(jwtService, usuarioRepository), UsernamePasswordAuthenticationFilter.class);
-        return http.build();
-    }
+    http.csrf(
+            csrf ->
+                csrf.csrfTokenRepository(csrfTokenRepository)
+                    .csrfTokenRequestHandler(csrfTokenRequestHandler)
+                    .ignoringRequestMatchers("/auth/**"))
+        .sessionManagement(
+            session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+        .authorizeHttpRequests(
+            auth ->
+                auth.requestMatchers("/swagger-ui/**", "/api-docs/**", "/v3/api-docs/**")
+                    .permitAll()
+                    .requestMatchers("/auth/**")
+                    .permitAll()
+                    .requestMatchers(HttpMethod.GET, "/IES")
+                    .permitAll()
+                    .anyRequest()
+                    .authenticated())
+        .exceptionHandling(
+            exceptions ->
+                exceptions.authenticationEntryPoint(
+                    (request, response, exception) -> response.sendError(401)))
+        .addFilterBefore(
+            new JwtAuthenticationFilter(jwtService, usuarioRepository),
+            UsernamePasswordAuthenticationFilter.class);
+    return http.build();
+  }
 }
