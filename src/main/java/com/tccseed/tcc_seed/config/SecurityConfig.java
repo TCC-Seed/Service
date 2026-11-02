@@ -51,7 +51,7 @@ public class SecurityConfig {
             csrf ->
                 csrf.csrfTokenRepository(csrfTokenRepository)
                     .csrfTokenRequestHandler(csrfTokenRequestHandler)
-                    .ignoringRequestMatchers("/auth/**", "/publicacoes/**"))
+                    .ignoringRequestMatchers("/auth/**", "/publicacoes/**", "/eventos/**"))
         .sessionManagement(
             session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
         .authorizeHttpRequests(
