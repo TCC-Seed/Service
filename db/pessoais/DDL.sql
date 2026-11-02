@@ -129,9 +129,13 @@ CREATE TABLE FORMULARIO_BASE
 
 CREATE TABLE FORMULARIO_PERSONALIZADO
 (
-    id     SERIAL       NOT NULL,
-    titulo VARCHAR(100) NOT NULL,
-    CONSTRAINT pk_formulario_personalizado PRIMARY KEY (id)
+    id                       SERIAL       NOT NULL,
+    titulo                   VARCHAR(100) NOT NULL,
+    id_ies                   SMALLINT     NOT NULL,
+    criado_em                TIMESTAMP    NOT NULL DEFAULT now(),
+    CONSTRAINT pk_formulario_personalizado PRIMARY KEY (id),
+    CONSTRAINT fk_formulario_personalizado_ies FOREIGN KEY (id_ies)
+        REFERENCES IES (id)
 );
 
 CREATE TABLE PERGUNTA_FORMULARIO_PERSONALIZADO
@@ -234,9 +238,14 @@ CREATE INDEX idx_estudante_id_ies ON ESTUDANTE (id_ies);
 CREATE INDEX idx_funcionario_id_ies ON FUNCIONARIO (id_ies);
 CREATE INDEX idx_evento_ies_id_evento ON EVENTO_IES (id_evento);
 CREATE INDEX idx_formulario_base_id_estudante ON FORMULARIO_BASE (id_estudante);
+CREATE INDEX idx_formulario_base_data_preenchimento ON FORMULARIO_BASE (data_preenchimento);
+CREATE INDEX idx_formulario_personalizado_ies ON FORMULARIO_PERSONALIZADO (id_ies);
+CREATE UNIQUE INDEX uq_pergunta_enunciado_normalizado
+    ON PERGUNTA_FORMULARIO_PERSONALIZADO (lower(btrim(enunciado)));
 CREATE INDEX idx_formulario_pergunta_id_pergunta ON FORMULARIO_PERGUNTA (id_pergunta);
 CREATE INDEX idx_resposta_formulario_id_usuario ON RESPOSTA_FORMULARIO_PERSONALIZADO (id_usuario);
 CREATE INDEX idx_resposta_formulario_id_formulario ON RESPOSTA_FORMULARIO_PERSONALIZADO (id_formulario_personalizado);
+CREATE INDEX idx_resposta_formulario_data_id ON RESPOSTA_FORMULARIO_PERSONALIZADO (id_formulario_personalizado, data_preenchimento DESC, id DESC);
 CREATE INDEX idx_item_resposta_id_pergunta ON ITEM_RESPOSTA_FORMULARIO_PERSONALIZADO (id_pergunta);
 CREATE INDEX idx_publicacao_id_funcionario ON PUBLICACAO (id_funcionario);
 

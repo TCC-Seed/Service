@@ -2,7 +2,6 @@ package com.tccseed.tcc_seed.controller.evento.dto;
 
 import com.tccseed.tcc_seed.domain.entity.Evento;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 
 public record EventoResponse(
@@ -15,16 +14,8 @@ public record EventoResponse(
     List<Long> iesIds) {
 
   public EventoResponse {
-    categorias = categorias == null ? null : new ArrayList<>(categorias);
-    iesIds = iesIds == null ? null : new ArrayList<>(iesIds);
-  }
-
-  public List<String> categorias() {
-    return categorias == null ? null : new ArrayList<>(categorias);
-  }
-
-  public List<Long> iesIds() {
-    return iesIds == null ? null : new ArrayList<>(iesIds);
+    categorias = categorias == null ? List.of() : List.copyOf(categorias);
+    iesIds = iesIds == null ? List.of() : List.copyOf(iesIds);
   }
 
   public static EventoResponse from(Evento evento) {

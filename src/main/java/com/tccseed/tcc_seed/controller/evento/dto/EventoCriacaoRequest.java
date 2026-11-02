@@ -5,8 +5,10 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
+@SuppressWarnings("PMD.ReturnEmptyCollectionRatherThanNull")
 public record EventoCriacaoRequest(
     @NotNull LocalDate dataInicio,
     LocalDate dataFim,
@@ -15,10 +17,7 @@ public record EventoCriacaoRequest(
     @NotNull List<@NotBlank @Size(max = 100) String> categorias) {
 
   public EventoCriacaoRequest {
-    categorias = categorias == null ? null : new ArrayList<>(categorias);
-  }
-
-  public List<String> categorias() {
-    return categorias == null ? null : new ArrayList<>(categorias);
+    categorias =
+        categorias == null ? null : Collections.unmodifiableList(new ArrayList<>(categorias));
   }
 }

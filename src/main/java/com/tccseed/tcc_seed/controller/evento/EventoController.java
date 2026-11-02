@@ -4,6 +4,7 @@ import com.tccseed.tcc_seed.controller.evento.dto.EventoAtualizacaoRequest;
 import com.tccseed.tcc_seed.controller.evento.dto.EventoCriacaoRequest;
 import com.tccseed.tcc_seed.controller.evento.dto.EventoResponse;
 import com.tccseed.tcc_seed.service.evento.EventoService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.UUID;
@@ -23,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
+@Tag(name = "evento-controller")
 @RequestMapping("/eventos")
 @RequiredArgsConstructor
 public class EventoController {

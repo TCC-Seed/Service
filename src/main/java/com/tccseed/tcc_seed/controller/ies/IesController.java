@@ -5,6 +5,7 @@ import com.tccseed.tcc_seed.controller.ies.dto.IesRequest;
 import com.tccseed.tcc_seed.controller.ies.dto.IesResponse;
 import com.tccseed.tcc_seed.service.ies.IesService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.security.Principal;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
+@Tag(name = "ies-controller")
 @RequestMapping("/IES")
 @RequiredArgsConstructor
 public class IesController {

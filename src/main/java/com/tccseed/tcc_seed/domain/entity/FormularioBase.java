@@ -20,7 +20,10 @@ import lombok.Setter;
 @Entity
 @Table(
     name = "formulario_base",
-    indexes = @Index(name = "idx_formulario_base_id_estudante", columnList = "id_estudante"))
+    indexes = {
+      @Index(name = "idx_formulario_base_id_estudante", columnList = "id_estudante"),
+      @Index(name = "idx_formulario_base_data_preenchimento", columnList = "data_preenchimento")
+    })
 @Getter
 @Setter
 @NoArgsConstructor
