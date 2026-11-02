@@ -24,7 +24,10 @@ import lombok.Setter;
       @Index(name = "idx_resposta_formulario_id_usuario", columnList = "id_usuario"),
       @Index(
           name = "idx_resposta_formulario_id_formulario",
-          columnList = "id_formulario_personalizado")
+          columnList = "id_formulario_personalizado"),
+      @Index(
+          name = "idx_resposta_formulario_data_id",
+          columnList = "id_formulario_personalizado, data_preenchimento, id")
     })
 @Getter
 @Setter

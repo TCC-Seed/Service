@@ -78,9 +78,10 @@ VALUES
     (5, 5, '2026-10-24', 'Revisão semestral.', TRUE, FALSE, FALSE, TRUE, FALSE, FALSE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, FALSE, TRUE)
 ON CONFLICT (id) DO NOTHING;
 
-INSERT INTO formulario_personalizado (id, titulo) VALUES
-    (1, 'Hábitos de estudo'), (2, 'Bem-estar semanal'), (3, 'Vida acadêmica'),
-    (4, 'Rotina e descanso'), (5, 'Avaliação de atividades')
+INSERT INTO formulario_personalizado (id, titulo, id_ies) VALUES
+    (1, 'Hábitos de estudo', 1), (2, 'Bem-estar semanal', 2),
+    (3, 'Vida acadêmica', 3), (4, 'Rotina e descanso', 4),
+    (5, 'Avaliação de atividades', 5)
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO pergunta_formulario_personalizado (id, enunciado) VALUES
@@ -88,24 +89,31 @@ INSERT INTO pergunta_formulario_personalizado (id, enunciado) VALUES
     (2, 'Como você avalia sua qualidade de sono?'),
     (3, 'Que atividade ajudou mais no seu bem-estar?'),
     (4, 'Você conseguiu organizar suas tarefas acadêmicas?'),
-    (5, 'Que tema gostaria de abordar no próximo encontro?')
+    (5, 'Que tema gostaria de abordar no próximo encontro?'),
+    (6, 'O que poderia melhorar nas atividades oferecidas?')
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO formulario_pergunta (id_formulario_personalizado, id_pergunta) VALUES
-    (1, 1), (2, 2), (3, 3), (4, 4), (5, 5)
+    (1, 1), (1, 2), (2, 1), (2, 3), (3, 2), (3, 4),
+    (4, 2), (4, 5), (5, 1), (5, 6)
 ON CONFLICT DO NOTHING;
 
 INSERT INTO resposta_formulario_personalizado (id, id_usuario, id_formulario_personalizado, data_preenchimento) VALUES
     (1, 1, 1, '2026-10-25'), (2, 2, 2, '2026-10-25'), (3, 3, 3, '2026-10-26'),
-    (4, 4, 4, '2026-10-26'), (5, 5, 5, '2026-10-27')
+    (4, 4, 4, '2026-10-26'), (5, 5, 5, '2026-10-27'), (6, 1, 1, '2026-10-28')
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO item_resposta_formulario_personalizado (id_resposta, id_pergunta, resposta) VALUES
     (1, 1, 'Cerca de 12 horas.'),
-    (2, 2, 'Boa, na maioria dos dias.'),
-    (3, 3, 'Caminhadas ao ar livre.'),
-    (4, 4, 'Sim, usei um cronograma semanal.'),
-    (5, 5, 'Organização financeira para estudantes.')
+    (1, 2, 'Boa, na maioria dos dias.'),
+    (2, 1, 'Cerca de 8 horas.'),
+    (3, 2, 'Sono regular.'),
+    (3, 4, 'Sim, usei um cronograma semanal.'),
+    (4, 2, 'Poderia melhorar.'),
+    (4, 5, 'Organização financeira para estudantes.'),
+    (5, 1, 'Cerca de 10 horas.'),
+    (5, 6, 'Mais atividades práticas.'),
+    (6, 1, 'Cerca de 14 horas.')
 ON CONFLICT DO NOTHING;
 
 INSERT INTO publicacao (id, id_funcionario, titulo, descricao, data_publicacao) VALUES

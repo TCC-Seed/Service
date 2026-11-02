@@ -67,3 +67,17 @@ _Evitar_: categoria global, tipo de publicação
 **Registro de auditoria do Seed**:
 Registro de uma criação, alteração ou exclusão de dados do Seed, com autoria, data e hora e valores anteriores e novos, sem credenciais de acesso.
 _Evitar_: registro de autenticação, histórico de login
+
+## Formulários personalizados
+
+**Formulário personalizado**:
+Questionário criado por um funcionário e pertencente a uma única IES; sua IES determina quais funcionários podem administrá-lo e quais estudantes podem respondê-lo.
+_Evitar_: formulário global, formulário por funcionário
+
+**Pergunta reutilizável**:
+Enunciado compartilhável entre formulários, identificado sem diferenciar espaços externos ou maiúsculas e minúsculas; seu texto não é alterado depois de criado.
+_Evitar_: pergunta exclusiva do formulário
+
+**Tentativa de resposta**:
+Uma submissão independente de um estudante para um formulário. Um estudante pode criar várias tentativas e cada tentativa pode estar incompleta.
+_Evitar_: resposta única do formulário
