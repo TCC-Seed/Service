@@ -97,6 +97,18 @@ docker compose exec -T postgres sh -c 'psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USE
 docker compose up -d app
 ```
 
+Se o volume já estiver inicializado e a role `app_backend` tiver sido criada antes
+das permissões para todas as tabelas de negócio, aplique a migração de permissões
+como DBA. Isso inclui `publicacao` e `categoria_publicacao`, usadas pelas rotas de
+publicação:
+
+```bash
+docker compose exec -T postgres sh -c 'psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -f /opt/seed-db/migrations/0007-schema-da-aplicacao.sql'
+```
+
+A migração pode ser reaplicada: a coluna de vínculo é criada apenas se faltar e as
+permissões são concedidas de forma idempotente.
+
 O DDL não é idempotente; não o execute novamente se algum dos tipos, domínio ou tabelas já existir. O processo não apaga nem recria o volume.
 
 ### Outros comandos disponíveis (Makefile)

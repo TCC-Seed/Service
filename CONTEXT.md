@@ -52,6 +52,16 @@ _Evitar_: número de usuário
 Categoria informada para um estudante: feminino, masculino, não informar ou outro.
 _Evitar_: sexo
 
+## Publicações
+
+**Publicação**:
+Conteúdo criado por um funcionário e visível aos estudantes e funcionários vinculados à mesma IES.
+_Evitar_: comunicado global, publicação de outra IES
+
+**Categoria da publicação**:
+Rótulo textual que classifica uma publicação; uma publicação pode ter várias categorias.
+_Evitar_: categoria global, tipo de publicação
+
 ## Histórico de alterações
 
 **Registro de auditoria do Seed**:

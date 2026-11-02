@@ -18,5 +18,8 @@ public interface EstudanteRepository extends JpaRepository<Estudante, Long> {
 
   List<Estudante> findByIesId(Long iesId);
 
+  @Query("select e.ies.id from Estudante e where e.token = :token")
+  Optional<Long> findIesIdByToken(@Param("token") UUID token);
+
   boolean existsByMatricula(String matricula);
 }

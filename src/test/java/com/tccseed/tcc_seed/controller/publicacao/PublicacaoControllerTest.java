@@ -1,8 +1,17 @@
 package com.tccseed.tcc_seed.controller.publicacao;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import com.tccseed.tcc_seed.controller.publicacao.dto.PublicacaoAtualizacaoRequest;
 import com.tccseed.tcc_seed.controller.publicacao.dto.PublicacaoRequest;
-import com.tccseed.tcc_seed.domain.entity.Publicacao;
+import com.tccseed.tcc_seed.controller.publicacao.dto.PublicacaoResponse;
 import com.tccseed.tcc_seed.service.publicacao.PublicacaoService;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -10,62 +19,76 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 @ExtendWith(MockitoExtension.class)
 class PublicacaoControllerTest {
-    @Mock private PublicacaoService service;
-    private PublicacaoController controller;
-    private final Publicacao entidade = new Publicacao();
-    private final Long id = 1L;
+  private static final UUID TOKEN = UUID.randomUUID();
 
-    private PublicacaoRequest request() {
-        return new PublicacaoRequest(null, null, null, null);
-    }
+  @Mock private PublicacaoService service;
+  @Mock private Authentication authentication;
+  private PublicacaoController controller;
+  private final Long id = 1L;
+  private final PublicacaoRequest request =
+      new PublicacaoRequest("Título", "Descrição", LocalDate.now(), List.of("Evento"));
+  private final PublicacaoAtualizacaoRequest atualizacaoRequest =
+      new PublicacaoAtualizacaoRequest("Título", "Descrição", LocalDate.now(), List.of("Evento"));
+  private final PublicacaoResponse response =
+      new PublicacaoResponse(1L, "Título", "Descrição", LocalDate.now(), List.of("Evento"));
 
-    @BeforeEach
-    void preparar() {
-        controller = new PublicacaoController(service);
-    }
+  @BeforeEach
+  void preparar() {
+    controller = new PublicacaoController(service);
+    when(authentication.getName()).thenReturn(TOKEN.toString());
+    doReturn(List.of(new SimpleGrantedAuthority("ROLE_FUNCIONARIO")))
+        .when(authentication)
+        .getAuthorities();
+  }
 
-    @Test
-    void criarDelegaAoServiceERetorna201() {
-        when(service.criar(any(Publicacao.class))).thenReturn(entidade);
-        ResponseEntity<Publicacao> response = controller.criar(request());
-        assertEquals(HttpStatus.CREATED, response.getStatusCode());
-        assertSame(entidade, response.getBody());
-        verify(service).criar(any(Publicacao.class));
-    }
+  @Test
+  void criarDelegaAoServiceERetorna201() {
+    when(service.criar(request, TOKEN, "ROLE_FUNCIONARIO")).thenReturn(response);
 
-    @Test
-    void listarDelegaAoService() {
-        when(service.listar()).thenReturn(List.of(entidade));
-        assertEquals(List.of(entidade), controller.listar());
-        verify(service).listar();
-    }
+    ResponseEntity<PublicacaoResponse> resultado = controller.criar(request, authentication);
 
-    @Test
-    void buscarPorIdDelegaAoService() {
-        when(service.buscarPorId(1L)).thenReturn(entidade);
-        assertSame(entidade, controller.buscarPorId(1L));
-        verify(service).buscarPorId(1L);
-    }
+    assertEquals(HttpStatus.CREATED, resultado.getStatusCode());
+    assertEquals(response, resultado.getBody());
+    verify(service).criar(request, TOKEN, "ROLE_FUNCIONARIO");
+  }
 
-    @Test
-    void atualizarDelegaAoService() {
-        when(service.atualizar(eq(1L), any(Publicacao.class))).thenReturn(entidade);
-        assertSame(entidade, controller.atualizar(1L, request()));
-        verify(service).atualizar(eq(1L), any(Publicacao.class));
-    }
+  @Test
+  void listarDelegaAoServiceComCategoriaEUsuario() {
+    when(service.listar(TOKEN, "Evento")).thenReturn(List.of(response));
 
-    @Test
-    void excluirRetorna204EDependeDoService() {
-        ResponseEntity<Void> response = controller.excluir(1L);
-        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
-        verify(service).excluir(1L);
-    }
+    assertEquals(List.of(response), controller.listar("Evento", authentication));
+
+    verify(service).listar(TOKEN, "Evento");
+  }
+
+  @Test
+  void buscarPorIdDelegaAoServiceComUsuario() {
+    when(service.buscarPorId(id, TOKEN)).thenReturn(response);
+
+    assertEquals(response, controller.buscarPorId(id, authentication));
+
+    verify(service).buscarPorId(id, TOKEN);
+  }
+
+  @Test
+  void atualizarDelegaAoServiceComUsuario() {
+    when(service.atualizar(id, atualizacaoRequest, TOKEN)).thenReturn(response);
+
+    assertEquals(response, controller.atualizar(id, atualizacaoRequest, authentication));
+
+    verify(service).atualizar(id, atualizacaoRequest, TOKEN);
+  }
+
+  @Test
+  void excluirRetorna204EDependeDoService() {
+    ResponseEntity<Void> resultado = controller.excluir(id, authentication);
+
+    assertEquals(HttpStatus.NO_CONTENT, resultado.getStatusCode());
+    verify(service).excluir(id, TOKEN);
+  }
 }
