@@ -62,8 +62,7 @@ public class PublicacaoService {
             .orElseThrow(PublicacaoService::publicacaoNaoEncontrada));
   }
 
-  public PublicacaoResponse atualizar(
-      Long id, PublicacaoAtualizacaoRequest request, UUID token) {
+  public PublicacaoResponse atualizar(Long id, PublicacaoAtualizacaoRequest request, UUID token) {
     Funcionario funcionarioAutenticado = funcionarioAutenticado(token);
     Publicacao publicacao = buscarParaAlteracao(id);
     validarMesmaIes(funcionarioAutenticado, publicacao);
@@ -93,7 +92,8 @@ public class PublicacaoService {
     publicacao.setDescricao(descricao);
     publicacao.setDataPublicacao(dataPublicacao);
     if (categoriasRecebidas == null) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A lista de categorias é obrigatória.");
+      throw new ResponseStatusException(
+          HttpStatus.BAD_REQUEST, "A lista de categorias é obrigatória.");
     }
     Set<String> categorias = new LinkedHashSet<>();
     for (String categoria : categoriasRecebidas) {
