@@ -127,7 +127,7 @@ public class FormularioBaseFuncionarioController {
     try {
       return UUID.fromString(authentication.getName());
     } catch (IllegalArgumentException exception) {
-      throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Sessão inválida.");
+      throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Sessão inválida.", exception);
     }
   }
 }

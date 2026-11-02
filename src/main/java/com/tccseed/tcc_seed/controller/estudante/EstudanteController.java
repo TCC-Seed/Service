@@ -7,6 +7,7 @@ import com.tccseed.tcc_seed.controller.estudante.dto.SenhaAtualizacaoRequest;
 import com.tccseed.tcc_seed.security.JwtAuthenticationFilter;
 import com.tccseed.tcc_seed.service.estudante.EstudanteService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.security.Principal;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
+@Tag(name = "estudante-controller")
 @RequestMapping("/estudante")
 @RequiredArgsConstructor
 public class EstudanteController {

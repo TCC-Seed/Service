@@ -8,4 +8,8 @@ public record RespostaResponse(
     Long idUsuario,
     LocalDate dataPreenchimento,
     boolean preenchida,
-    List<ItemRespostaResponse> itens) {}
+    List<ItemRespostaResponse> itens) {
+  public RespostaResponse {
+    itens = List.copyOf(itens);
+  }
+}

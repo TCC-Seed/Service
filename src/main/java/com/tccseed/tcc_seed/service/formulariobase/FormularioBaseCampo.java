@@ -123,7 +123,9 @@ public enum FormularioBaseCampo {
   }
 
   public static List<FormularioBaseCampo> parse(String campos) {
-    if (campos == null || campos.isBlank()) return todos();
+    if (campos == null || campos.isBlank()) {
+      return todos();
+    }
     List<String> nomes = Arrays.stream(campos.split(",", -1)).map(String::trim).toList();
     List<String> invalidos =
         nomes.stream().filter(nome -> localizar(nome) == null).distinct().toList();

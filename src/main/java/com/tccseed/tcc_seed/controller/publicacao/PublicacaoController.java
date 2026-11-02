@@ -4,6 +4,7 @@ import com.tccseed.tcc_seed.controller.publicacao.dto.PublicacaoAtualizacaoReque
 import com.tccseed.tcc_seed.controller.publicacao.dto.PublicacaoRequest;
 import com.tccseed.tcc_seed.controller.publicacao.dto.PublicacaoResponse;
 import com.tccseed.tcc_seed.service.publicacao.PublicacaoService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.UUID;
@@ -23,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
+@Tag(name = "publicacao-controller")
 @RequestMapping("/publicacoes")
 @RequiredArgsConstructor
 public class PublicacaoController {

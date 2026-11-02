@@ -87,7 +87,8 @@ public class FormularioBaseConsultaService {
     try {
       sortDirection = Sort.Direction.fromString(direcao);
     } catch (IllegalArgumentException exception) {
-      throw badRequest("ordem deve ser 'asc' ou 'desc'.");
+      throw new ResponseStatusException(
+          HttpStatus.BAD_REQUEST, "ordem deve ser 'asc' ou 'desc'.", exception);
     }
     return PageRequest.of(page, size, Sort.by(sortDirection, "dataPreenchimento", "id"));
   }
@@ -96,7 +97,7 @@ public class FormularioBaseConsultaService {
     try {
       return FormularioBaseCampo.parse(campos);
     } catch (IllegalArgumentException exception) {
-      throw badRequest(exception.getMessage());
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, exception.getMessage(), exception);
     }
   }
 

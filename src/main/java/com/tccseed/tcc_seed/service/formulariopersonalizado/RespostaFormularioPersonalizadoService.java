@@ -118,16 +118,19 @@ public class RespostaFormularioPersonalizadoService {
     Set<Long> vistos = new HashSet<>();
     List<ItemRespostaFormularioPersonalizado> itens = new ArrayList<>();
     for (ItemRespostaRequest request : requests) {
-      if (request == null || request.idPergunta() == null)
+      if (request == null || request.idPergunta() == null) {
         throw new ResponseStatusException(
             HttpStatus.BAD_REQUEST, "Cada resposta deve informar idPergunta.");
+      }
       Long perguntaId = request.idPergunta();
-      if (!vistos.add(perguntaId))
+      if (!vistos.add(perguntaId)) {
         throw new ResponseStatusException(
             HttpStatus.BAD_REQUEST, "A mesma pergunta não pode aparecer duas vezes na resposta.");
-      if (!vinculoRepository.existsByFormularioIdAndPerguntaId(formularioId, perguntaId))
+      }
+      if (!vinculoRepository.existsByFormularioIdAndPerguntaId(formularioId, perguntaId)) {
         throw new ResponseStatusException(
             HttpStatus.BAD_REQUEST, "A pergunta não pertence a este formulário.");
+      }
       ItemRespostaFormularioPersonalizado item = new ItemRespostaFormularioPersonalizado();
       ItemRespostaFormularioPersonalizadoId id = new ItemRespostaFormularioPersonalizadoId();
       id.setIdPergunta(perguntaId);
@@ -150,7 +153,9 @@ public class RespostaFormularioPersonalizadoService {
   }
 
   private List<RespostaResponse> montar(List<RespostaFormularioPersonalizado> respostas) {
-    if (respostas.isEmpty()) return List.of();
+    if (respostas.isEmpty()) {
+      return List.of();
+    }
     List<Long> ids = respostas.stream().map(RespostaFormularioPersonalizado::getId).toList();
     Map<Long, List<ItemRespostaResponse>> porResposta = new LinkedHashMap<>();
     itemRepository
@@ -193,7 +198,7 @@ public class RespostaFormularioPersonalizadoService {
           .findByToken(UUID.fromString(token))
           .orElseThrow(() -> naoEncontrado("Estudante não encontrado."));
     } catch (IllegalArgumentException e) {
-      throw naoEncontrado("Estudante não encontrado.");
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Estudante não encontrado.", e);
     }
   }
 
@@ -201,7 +206,7 @@ public class RespostaFormularioPersonalizadoService {
     try {
       return UUID.fromString(token);
     } catch (IllegalArgumentException e) {
-      throw naoEncontrado("Funcionário não encontrado.");
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Funcionário não encontrado.", e);
     }
   }
 
@@ -212,9 +217,10 @@ public class RespostaFormularioPersonalizadoService {
   }
 
   private PageRequest pageable(int page, int size) {
-    if (page < 0 || size < 1 || size > 100)
+    if (page < 0 || size < 1 || size > 100) {
       throw new ResponseStatusException(
           HttpStatus.BAD_REQUEST, "Parâmetros de paginação inválidos.");
+    }
     return PageRequest.of(page, size);
   }
 

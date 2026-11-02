@@ -118,13 +118,18 @@ public class FormularioPersonalizadoService {
     Estudante estudante = estudante(token);
     List<FormularioResumoResponse> resumos =
         formularioRepository.listarResumosByIesId(estudante.getIes().getId());
-    if (resumos.isEmpty()) return resumos;
+    if (resumos.isEmpty()) {
+      return resumos;
+    }
     List<Long> formularioIds = resumos.stream().map(FormularioResumoResponse::id).toList();
     var tentativas = respostaRepository.findLatestCandidates(estudante.getId(), formularioIds);
     Map<Long, Long> maisRecentes = new LinkedHashMap<>();
-    for (var tentativa : tentativas)
+    for (var tentativa : tentativas) {
       maisRecentes.putIfAbsent(tentativa.getFormulario().getId(), tentativa.getId());
-    if (maisRecentes.isEmpty()) return resumos;
+    }
+    if (maisRecentes.isEmpty()) {
+      return resumos;
+    }
     List<RespostaStatusProjection> status =
         respostaRepository.countRespondidasPorFormulario(new ArrayList<>(maisRecentes.values()));
     Map<Long, Long> respondidas = new LinkedHashMap<>();
@@ -182,7 +187,7 @@ public class FormularioPersonalizadoService {
           .findByToken(UUID.fromString(token))
           .orElseThrow(() -> naoEncontrado("Funcionário não encontrado."));
     } catch (IllegalArgumentException e) {
-      throw naoEncontrado("Funcionário não encontrado.");
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Funcionário não encontrado.", e);
     }
   }
 
@@ -192,14 +197,15 @@ public class FormularioPersonalizadoService {
           .findByToken(UUID.fromString(token))
           .orElseThrow(() -> naoEncontrado("Estudante não encontrado."));
     } catch (IllegalArgumentException e) {
-      throw naoEncontrado("Estudante não encontrado.");
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Estudante não encontrado.", e);
     }
   }
 
   private PageRequest pageable(int page, int size) {
-    if (page < 0 || size < 1 || size > 100)
+    if (page < 0 || size < 1 || size > 100) {
       throw new ResponseStatusException(
           HttpStatus.BAD_REQUEST, "Parâmetros de paginação inválidos.");
+    }
     return PageRequest.of(page, size);
   }
 

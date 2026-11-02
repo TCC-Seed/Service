@@ -23,7 +23,9 @@ public class PerguntaStoreService {
                     + "on conflict (lower(btrim(enunciado))) do nothing returning id")
             .setParameter("enunciado", enunciado)
             .getResultList();
-    if (ids.isEmpty()) return Optional.empty();
+    if (ids.isEmpty()) {
+      return Optional.empty();
+    }
     Number id = (Number) ids.getFirst();
     return repository.findById(id.longValue());
   }

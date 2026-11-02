@@ -32,13 +32,15 @@ public class PerguntaFormularioPersonalizadoService {
     Set<String> normalizados = new HashSet<>();
     List<PerguntaFormularioPersonalizado> perguntas = new ArrayList<>();
     for (PerguntaFormularioRequest request : requests) {
-      if (request == null)
+      if (request == null) {
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Pergunta inválida.");
+      }
       String enunciado = request.enunciado().trim();
       String chave = normalizar(enunciado);
-      if (!normalizados.add(chave))
+      if (!normalizados.add(chave)) {
         throw new ResponseStatusException(
             HttpStatus.BAD_REQUEST, "O formulário não pode conter perguntas duplicadas.");
+      }
       perguntas.add(findOrCreate(enunciado, chave));
     }
     return perguntas;
@@ -51,11 +53,12 @@ public class PerguntaFormularioPersonalizadoService {
           .findByToken(UUID.fromString(token))
           .orElseThrow(() -> naoEncontrado("Funcionário não encontrado."));
     } catch (IllegalArgumentException e) {
-      throw naoEncontrado("Funcionário não encontrado.");
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Funcionário não encontrado.", e);
     }
-    if (page < 0 || size < 1 || size > 100)
+    if (page < 0 || size < 1 || size > 100) {
       throw new ResponseStatusException(
           HttpStatus.BAD_REQUEST, "Parâmetros de paginação inválidos.");
+    }
     String filtro = busca == null ? "" : busca.trim();
     return perguntaRepository
         .buscar(filtro, PageRequest.of(page, size))
@@ -64,7 +67,9 @@ public class PerguntaFormularioPersonalizadoService {
 
   private PerguntaFormularioPersonalizado findOrCreate(String enunciado, String chave) {
     var existente = perguntaRepository.findByEnunciadoNormalizado(chave);
-    if (existente.isPresent()) return existente.get();
+    if (existente.isPresent()) {
+      return existente.get();
+    }
     return perguntaStore
         .criarSeAusente(enunciado)
         .orElseGet(
