@@ -1,6 +1,8 @@
 package com.tccseed.tcc_seed.domain.entity;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.CollectionTable;
+import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.ForeignKey;
@@ -12,6 +14,8 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -45,4 +49,14 @@ public class Publicacao {
 
   @Column(name = "data_publicacao", nullable = false)
   private LocalDate dataPublicacao;
+
+  @ElementCollection(fetch = FetchType.LAZY)
+  @CollectionTable(
+      name = "categoria_publicacao",
+      joinColumns =
+          @JoinColumn(
+              name = "id_publicacao",
+              foreignKey = @ForeignKey(name = "fk_categoria_publicacao_publicacao")))
+  @Column(name = "categoria", nullable = false, length = 100)
+  private Set<String> categorias = new LinkedHashSet<>();
 }

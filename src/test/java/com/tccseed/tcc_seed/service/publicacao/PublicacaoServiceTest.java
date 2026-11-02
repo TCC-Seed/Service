@@ -1,7 +1,20 @@
 package com.tccseed.tcc_seed.service.publicacao;
 
-import com.tccseed.tcc_seed.domain.entity.Publicacao;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import com.tccseed.tcc_seed.controller.publicacao.dto.PublicacaoAtualizacaoRequest;
+import com.tccseed.tcc_seed.controller.publicacao.dto.PublicacaoRequest;
+import com.tccseed.tcc_seed.repository.EstudanteRepository;
+import com.tccseed.tcc_seed.repository.FuncionarioRepository;
 import com.tccseed.tcc_seed.repository.PublicacaoRepository;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -10,80 +23,59 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.List;
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
-
 @ExtendWith(MockitoExtension.class)
 class PublicacaoServiceTest {
-    @Mock private PublicacaoRepository repository;
-    private PublicacaoService service;
-    private final Publicacao entidade = new Publicacao();
-    private final Long id = 1L;
+  private static final UUID TOKEN = UUID.randomUUID();
 
-    @BeforeEach
-    void preparar() {
-        service = new PublicacaoService(repository);
-    }
+  @Mock private PublicacaoRepository publicacaoRepository;
+  @Mock private FuncionarioRepository funcionarioRepository;
+  @Mock private EstudanteRepository estudanteRepository;
+  private PublicacaoService service;
+  private final Long id = 1L;
+  private final PublicacaoRequest request =
+      new PublicacaoRequest("Título", "Descrição", LocalDate.now(), List.of("Evento"));
+  private final PublicacaoAtualizacaoRequest atualizacaoRequest =
+      new PublicacaoAtualizacaoRequest("Título", "Descrição", LocalDate.now(), List.of("Evento"));
 
-    @Test
-    void criarPersisteEntidade() {
-        when(repository.save(entidade)).thenReturn(entidade);
-        assertSame(entidade, service.criar(entidade));
-        verify(repository).save(entidade);
-    }
+  @BeforeEach
+  void preparar() {
+    service =
+        new PublicacaoService(publicacaoRepository, funcionarioRepository, estudanteRepository);
+  }
 
-    @Test
-    void listarRetornaTodosOsRegistros() {
-        when(repository.findAll()).thenReturn(List.of(entidade));
-        assertEquals(List.of(entidade), service.listar());
-        verify(repository).findAll();
-    }
+  @Test
+  void criarRejeitaRoleDeEstudante() {
+    ResponseStatusException erro =
+        assertThrows(
+            ResponseStatusException.class,
+            () -> service.criar(request, TOKEN, "ROLE_ESTUDANTE"));
 
-    @Test
-    void buscarPorIdRetornaRegistroExistente() {
-        when(repository.findById(id)).thenReturn(Optional.of(entidade));
-        assertSame(entidade, service.buscarPorId(id));
-    }
+    assertEquals(HttpStatus.FORBIDDEN, erro.getStatusCode());
+    verify(funcionarioRepository, never()).findByToken(TOKEN);
+    verify(publicacaoRepository, never()).save(org.mockito.ArgumentMatchers.any());
+  }
 
-    @Test
-    void buscarPorIdInexistenteRetorna404() {
-        when(repository.findById(id)).thenReturn(Optional.empty());
-        ResponseStatusException erro = assertThrows(ResponseStatusException.class, () -> service.buscarPorId(id));
-        assertEquals(HttpStatus.NOT_FOUND, erro.getStatusCode());
-    }
+  @Test
+  void listarFiltraPelaIesEPorCategoria() {
+    when(funcionarioRepository.findIesIdByToken(TOKEN)).thenReturn(Optional.of(7L));
+    when(publicacaoRepository.findVisiveisPorIesECategoria(7L, "Evento"))
+        .thenReturn(List.of());
 
-    @Test
-    void atualizarRegistroExistentePersisteComIdDaRota() {
-        when(repository.existsById(id)).thenReturn(true);
-        when(repository.save(entidade)).thenReturn(entidade);
-        assertSame(entidade, service.atualizar(id, entidade));
-        assertEquals(id, entidade.getId());
-        verify(repository).save(entidade);
-    }
+    assertEquals(List.of(), service.listar(TOKEN, "Evento"));
 
-    @Test
-    void atualizarRegistroInexistenteRetorna404SemSalvar() {
-        when(repository.existsById(id)).thenReturn(false);
-        ResponseStatusException erro = assertThrows(ResponseStatusException.class, () -> service.atualizar(id, entidade));
-        assertEquals(HttpStatus.NOT_FOUND, erro.getStatusCode());
-        verify(repository, never()).save(any());
-    }
+    verify(publicacaoRepository).findVisiveisPorIesECategoria(7L, "Evento");
+  }
 
-    @Test
-    void excluirRegistroExistente() {
-        when(repository.existsById(id)).thenReturn(true);
-        service.excluir(id);
-        verify(repository).deleteById(id);
-    }
+  @Test
+  void estudanteNaoPodeEditarPublicacao() {
+    when(funcionarioRepository.findByToken(TOKEN)).thenReturn(Optional.empty());
 
-    @Test
-    void excluirRegistroInexistenteRetorna404SemExcluir() {
-        when(repository.existsById(id)).thenReturn(false);
-        ResponseStatusException erro = assertThrows(ResponseStatusException.class, () -> service.excluir(id));
-        assertEquals(HttpStatus.NOT_FOUND, erro.getStatusCode());
-        verify(repository, never()).deleteById(any());
-    }
+    ResponseStatusException erro =
+            assertThrows(
+                ResponseStatusException.class,
+                () -> service.atualizar(id, atualizacaoRequest, TOKEN));
+
+    assertEquals(HttpStatus.FORBIDDEN, erro.getStatusCode());
+    verify(publicacaoRepository, never()).findComFuncionarioECategoriasPorId(id);
+  }
 }

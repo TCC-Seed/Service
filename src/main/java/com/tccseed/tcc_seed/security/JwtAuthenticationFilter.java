@@ -55,6 +55,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
       return;
     }
 
+    String roleDoBanco = "ROLE_" + usuario.getTipo().name();
+    if (!roleDoBanco.equals(claims.role())) {
+      SecurityContextHolder.clearContext();
+      response.sendError(HttpServletResponse.SC_FORBIDDEN);
+      return;
+    }
+
     var authentication =
         new UsernamePasswordAuthenticationToken(
             usuario.getToken().toString(),

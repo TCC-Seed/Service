@@ -19,6 +19,8 @@ public interface FuncionarioRepository extends JpaRepository<Funcionario, Long> 
   @Query("select f.ies.id from Funcionario f where f.token = :token")
   Optional<Long> findIesIdByToken(@Param("token") UUID token);
 
+  Optional<Funcionario> findByToken(UUID token);
+
   long countByIesId(Long iesId);
 
   List<Funcionario> findByIesId(Long iesId);
