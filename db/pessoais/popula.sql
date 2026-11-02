@@ -75,7 +75,12 @@ VALUES
     (2, 2, '2026-10-21', 'Acompanhamento mensal.', TRUE, FALSE, TRUE, TRUE, TRUE, FALSE, TRUE, FALSE, TRUE, TRUE, FALSE, FALSE, FALSE, FALSE),
     (3, 3, '2026-10-22', 'Rotina acadêmica.', FALSE, TRUE, FALSE, TRUE, FALSE, TRUE, TRUE, TRUE, FALSE, TRUE, TRUE, FALSE, FALSE, FALSE),
     (4, 4, '2026-10-23', 'Plano de bem-estar.', TRUE, TRUE, TRUE, FALSE, TRUE, TRUE, FALSE, FALSE, TRUE, FALSE, FALSE, TRUE, FALSE, FALSE),
-    (5, 5, '2026-10-24', 'Revisão semestral.', TRUE, FALSE, FALSE, TRUE, FALSE, FALSE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, FALSE, TRUE)
+    (5, 5, '2026-10-24', 'Revisão semestral.', TRUE, FALSE, FALSE, TRUE, FALSE, FALSE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, FALSE, TRUE),
+    (6, 1, '2026-11-01', 'Atualização após atividade física.', FALSE, TRUE, TRUE, TRUE, TRUE, TRUE, FALSE, TRUE, FALSE, TRUE, FALSE, FALSE, TRUE, FALSE),
+    (7, 2, '2026-10-29', 'Acompanhamento de rotina e descanso.', TRUE, TRUE, FALSE, FALSE, TRUE, FALSE, TRUE, TRUE, TRUE, FALSE, TRUE, FALSE, FALSE, TRUE),
+    (8, 3, '2026-10-30', 'Relato de adaptação acadêmica.', TRUE, FALSE, TRUE, TRUE, FALSE, TRUE, TRUE, FALSE, FALSE, TRUE, TRUE, TRUE, FALSE, FALSE),
+    (9, 4, '2026-10-31', 'Revisão de metas pessoais.', FALSE, TRUE, FALSE, TRUE, TRUE, FALSE, FALSE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE, FALSE),
+    (10, 5, '2026-11-01', 'Novo acompanhamento semestral.', TRUE, TRUE, TRUE, FALSE, FALSE, TRUE, TRUE, FALSE, TRUE, TRUE, FALSE, FALSE, FALSE, TRUE)
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO formulario_personalizado (id, titulo, id_ies) VALUES

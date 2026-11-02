@@ -238,6 +238,7 @@ CREATE INDEX idx_estudante_id_ies ON ESTUDANTE (id_ies);
 CREATE INDEX idx_funcionario_id_ies ON FUNCIONARIO (id_ies);
 CREATE INDEX idx_evento_ies_id_evento ON EVENTO_IES (id_evento);
 CREATE INDEX idx_formulario_base_id_estudante ON FORMULARIO_BASE (id_estudante);
+CREATE INDEX idx_formulario_base_data_preenchimento ON FORMULARIO_BASE (data_preenchimento);
 CREATE INDEX idx_formulario_personalizado_ies ON FORMULARIO_PERSONALIZADO (id_ies);
 CREATE UNIQUE INDEX uq_pergunta_enunciado_normalizado
     ON PERGUNTA_FORMULARIO_PERSONALIZADO (lower(btrim(enunciado)));

@@ -46,14 +46,17 @@ public class FormularioPersonalizadoEstudanteController {
   @PostMapping("/{id}/respostas")
   @Operation(summary = "Criar uma tentativa de resposta")
   public ResponseEntity<RespostaResponse> criar(
-      @PathVariable Long id, @Valid @RequestBody RespostaRequest request, Authentication authentication) {
+      @PathVariable Long id,
+      @Valid @RequestBody RespostaRequest request,
+      Authentication authentication) {
     return ResponseEntity.status(HttpStatus.CREATED)
         .body(respostaService.criar(id, request, authentication.getName()));
   }
 
   @GetMapping("/{id}/respostas")
   @Operation(summary = "Listar minhas tentativas, da mais recente à mais antiga")
-  public List<RespostaResponse> minhasRespostas(@PathVariable Long id, Authentication authentication) {
+  public List<RespostaResponse> minhasRespostas(
+      @PathVariable Long id, Authentication authentication) {
     return respostaService.minhasRespostas(id, authentication.getName());
   }
 
@@ -64,7 +67,8 @@ public class FormularioPersonalizadoEstudanteController {
       @PathVariable Long idResposta,
       @Valid @RequestBody RespostaRequest request,
       Authentication authentication) {
-    return respostaService.atualizarMinhaResposta(id, idResposta, request, authentication.getName());
+    return respostaService.atualizarMinhaResposta(
+        id, idResposta, request, authentication.getName());
   }
 
   @DeleteMapping("/{id}/respostas/{idResposta}")

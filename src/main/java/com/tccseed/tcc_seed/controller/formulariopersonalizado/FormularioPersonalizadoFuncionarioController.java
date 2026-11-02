@@ -39,12 +39,17 @@ public class FormularioPersonalizadoFuncionarioController {
   @PostMapping
   @Operation(
       summary = "Criar formulário personalizado para a IES do funcionário",
-      description = "Usa a autenticação do cookie de login, como os endpoints de eventos. Cada pergunta é identificada pelo enunciado e reutilizada ou criada automaticamente.")
+      description =
+          "Usa a autenticação do cookie de login, como os endpoints de eventos. Cada pergunta é identificada pelo enunciado e reutilizada ou criada automaticamente.")
   @io.swagger.v3.oas.annotations.parameters.RequestBody(
       required = true,
-      content = @Content(
-          mediaType = "application/json",
-          examples = @ExampleObject(value = "{\"titulo\":\"Pesquisa de satisfação\",\"perguntas\":[{\"enunciado\":\"Como avalia o curso?\"}]}")))
+      content =
+          @Content(
+              mediaType = "application/json",
+              examples =
+                  @ExampleObject(
+                      value =
+                          "{\"titulo\":\"Pesquisa de satisfação\",\"perguntas\":[{\"enunciado\":\"Como avalia o curso?\"}]}")))
   @ApiResponses({
     @ApiResponse(responseCode = "201", description = "Formulário criado"),
     @ApiResponse(responseCode = "400", description = "Dados inválidos", content = @Content),
@@ -74,7 +79,9 @@ public class FormularioPersonalizadoFuncionarioController {
   @PutMapping("/{id}")
   @Operation(summary = "Editar formulário personalizado")
   public FormularioResponse atualizar(
-      @PathVariable Long id, @Valid @RequestBody FormularioRequest request, Authentication authentication) {
+      @PathVariable Long id,
+      @Valid @RequestBody FormularioRequest request,
+      Authentication authentication) {
     return formularioService.atualizar(id, request, authentication.getName());
   }
 

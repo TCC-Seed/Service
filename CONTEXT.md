@@ -81,3 +81,9 @@ _Evitar_: pergunta exclusiva do formulário
 **Tentativa de resposta**:
 Uma submissão independente de um estudante para um formulário. Um estudante pode criar várias tentativas e cada tentativa pode estar incompleta.
 _Evitar_: resposta única do formulário
+
+## Formulário base
+
+**Resposta do formulário base**:
+Registro de acompanhamento preenchido por um estudante em uma data, composto por respostas booleanas e uma anotação opcional. O estudante pertence a uma única IES; funcionários consultam registros dessa IES sem receber os dados pessoais do estudante.
+_Evitar_: formulário personalizado, resposta global

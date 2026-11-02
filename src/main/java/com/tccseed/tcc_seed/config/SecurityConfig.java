@@ -55,6 +55,8 @@ public class SecurityConfig {
                         "/auth/**",
                         "/publicacoes/**",
                         "/eventos/**",
+                        "/api/funcionario/formularios-base/**",
+                        "/api/estudante/formularios-base/**",
                         "/api/funcionario/formularios-personalizados/**",
                         "/api/estudante/formularios-personalizados/**"))
         .sessionManagement(
