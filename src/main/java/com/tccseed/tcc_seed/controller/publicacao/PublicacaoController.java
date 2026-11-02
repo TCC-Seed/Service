@@ -42,8 +42,7 @@ public class PublicacaoController {
   }
 
   @GetMapping("/{id}")
-  public PublicacaoResponse buscarPorId(
-      @PathVariable Long id, Authentication auth) {
+  public PublicacaoResponse buscarPorId(@PathVariable Long id, Authentication auth) {
     return service.buscarPorId(id, token(auth));
   }
 
@@ -56,8 +55,7 @@ public class PublicacaoController {
   }
 
   @DeleteMapping("/{id}")
-  public ResponseEntity<Void> excluir(
-      @PathVariable Long id, Authentication auth) {
+  public ResponseEntity<Void> excluir(@PathVariable Long id, Authentication auth) {
     service.excluir(id, token(auth));
     return ResponseEntity.noContent().build();
   }
